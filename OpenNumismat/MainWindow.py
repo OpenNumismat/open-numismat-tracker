@@ -478,54 +478,58 @@ class MainWindow(QtGui.QMainWindow):
         parser = AuctionSpbParser()
         page_parser = AuctionSpbPageParser()
         auct = 132
-        cat = 7
-        p = 0
-        while True:
-            params = urllib.parse.urlencode({'auctID': auct, 'catID': cat, 'order': 'numblot', 'p': p})
-            url = "http://auction.spb.ru/?%s" % params
-            p = p + 20
-            items = page_parser.parse(url)
-            print(len(items))
-            if not items:
-                break
+        for auct_ in range(132):
+            auct = auct_ + 1
 
-            for item in items:
-                if item['bids'] > 0:
-                    item1 = parser.parse(item['url'])
-#                    print(item)
-#                    print(item1)
+            cat = 3
+            p = 0
+            while True:
+                params = urllib.parse.urlencode({'auctID': auct, 'catID': cat, 'order': 'numblot', 'p': p})
+                url = "http://auction.spb.ru/?%s" % params
+                p = p + 20
+                items = page_parser.parse(url)
+                print(len(items))
+                if not items:
+                    break
 
-                    record_item = {
-                            'title': item1['title'],
-                            'denomination': item['denomination'],
-                            'country': None,
-                            'year': item['year'],
-                            'period': None,
-                            'mintmark': item['mintmark'],
-                            'category': category[cat],
-                            'status': 'pass',
-                            'material': item['material'],
-                            'grade': item['grade'],
-                            'place': 'АукционЪ.СПб',
-                            'price': item1['price'],
-                            'paid': item1['totalPayPrice'],
-                            'bailed': item1['totalSalePrice'],
-                            'buyer': item['buyer'],
-                            'url': item['url'],
-                            'bids': item['bids'],
-                            'bidders': item1['bidders'],
-                            'date': item1['date'],
-                    }
-                    imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
-                    for i, imageUrl in enumerate(item1['images']):
-                        if i < len(imageFields):
-                            record_item[imageFields[i]] = loadFromUrl(imageUrl)
+                for item in items:
+                    if item['bids'] > 0:
+                        item1 = parser.parse(item['url'])
+    #                    print(item)
+    #                    print(item1)
 
-                    record = model.record()
-                    for field, value in record_item.items():
-                        record.setValue(field, value)
-                    model.appendRecordQuiet(record)
-                else:
-                    print(item, '- too little bids')
+                        record_item = {
+                                'title': item1['title'],
+                                'denomination': item['denomination'],
+                                'country': None,
+                                'year': item['year'],
+                                'period': None,
+                                'mintmark': item['mintmark'],
+                                'category': category[cat],
+                                'status': 'pass',
+                                'material': item['material'],
+                                'grade': item['grade'],
+                                'auction': 'АукционЪ.СПб',
+                                'auctionnum': auct,
+                                'price': item1['price'],
+                                'paid': item1['totalPayPrice'],
+                                'bailed': item1['totalSalePrice'],
+                                'buyer': item['buyer'],
+                                'url': item['url'],
+                                'bids': item['bids'],
+                                'bidders': item1['bidders'],
+                                'date': item1['date'],
+                        }
+                        imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
+                        for i, imageUrl in enumerate(item1['images']):
+                            if i < len(imageFields):
+                                record_item[imageFields[i]] = loadFromUrl(imageUrl)
 
-            break
+                        record = model.record()
+                        for field, value in record_item.items():
+                            record.setValue(field, value)
+                        model.appendRecordQuiet(record)
+                    else:
+                        print(item, '- too little bids')
+
+#            break

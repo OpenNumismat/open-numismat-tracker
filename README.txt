@@ -2,7 +2,7 @@ Requirement:
  * Python 3.3.1
  * PyQt4 4.10
  * Jinja2 2.6 (for reports)
- * lxml 2.3 (for auction parsing) [http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml]
+ * lxml 3.1.2 (for auction parsing) [http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml]
  * cssselect 0.8
 
  * xlwt3 0.1.2 (for exporting to Excel)

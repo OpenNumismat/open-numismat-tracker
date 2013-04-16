@@ -244,8 +244,8 @@ class DetailsTabWidget(QtGui.QTabWidget):
         return self.payComission
 
     def payPriceChanged(self, text):
-        price = textToFloat(self.items['payprice'].value())
-        totalPrice = textToFloat(self.items['totalpayprice'].value())
+        price = textToFloat(self.items['price'].value())
+        totalPrice = textToFloat(self.items['paid'].value())
         self.payComission.widget().setText(floatToText(totalPrice - price))
 
     def addSaleCommission(self):

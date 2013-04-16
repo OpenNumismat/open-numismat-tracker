@@ -33,6 +33,7 @@ class CollectionModel(QSqlTableModel):
 
         fileName = collection.fileName
         self.workingDir = QtCore.QFileInfo(fileName).absolutePath()
+        self.collectionName = collection.getCollectionName()
 
         self.reference = collection.reference
         self.fields = collection.fields
@@ -111,7 +112,7 @@ class CollectionModel(QSqlTableModel):
         self.submitAll()
 
     def generateImagePath(self, img_id, create_folder=False):
-        path = '%s/images/%s/%s' % (self.workingDir, img_id[0:3], img_id[3:6])
+        path = '%s/%s_images/%s/%s' % (self.workingDir, self.collectionName, img_id[0:3], img_id[3:6])
         if create_folder:
             os.makedirs(path, exist_ok=True)
         file_name = '%s/%s.jpg' % (path, img_id)
@@ -344,7 +345,7 @@ class CollectionModel(QSqlTableModel):
 
 
 class CollectionSettings(BaseSettings):
-    Default = {'Version': 3, 'Password': cryptPassword()}
+    Default = {'Version': 1, 'Password': cryptPassword()}
 
     def __init__(self, collection):
         super(CollectionSettings, self).__init__()

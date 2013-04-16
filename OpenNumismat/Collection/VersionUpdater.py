@@ -16,12 +16,10 @@ class Updater(QtCore.QObject):
     def update(self):
         if self.check():
             if self.__begin():
-                if self.currentVersion < 2:
-                    updater = UpdaterTo2(self.collection)
-                    updater.update()
-                if self.currentVersion < 3:
-                    updater = UpdaterTo3(self.collection)
-                    updater.update()
+                pass
+#                if self.currentVersion < 2:
+#                    updater = UpdaterTo2(self.collection)
+#                    updater.update()
 
                 self.__finalize()
 
@@ -231,29 +229,6 @@ class UpdaterTo2(_Updater):
         self.progressDlg.setLabelText(self.tr("Vacuum..."))
 
         self.collection.vacuum()
-
-        self._finish()
-
-
-class UpdaterTo3(_Updater):
-    def __init__(self, collection):
-        super(UpdaterTo3, self).__init__(collection)
-
-    def getTotalCount(self):
-        return 1
-
-    def update(self):
-        self._begin()
-
-        self.db.transaction()
-
-        sql = "ALTER TABLE lists ADD COLUMN sortorder INTEGER"
-        QSqlQuery(sql, self.db)
-
-        self.collection.settings['Version'] = 3
-        self.collection.settings.save()
-
-        self.db.commit()
 
         self._finish()
 
