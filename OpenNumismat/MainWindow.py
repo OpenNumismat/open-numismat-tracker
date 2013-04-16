@@ -14,8 +14,6 @@ from OpenNumismat.Tools.Gui import createIcon
 from OpenNumismat.Reports.Preview import PreviewDialog
 from OpenNumismat import version
 
-from OpenNumismat.Collection.Import import *
-
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -96,45 +94,6 @@ class MainWindow(QtGui.QMainWindow):
                                               self.tr("Set password..."), self)
         passwordCollectionAct.triggered.connect(self.passwordCollectionEvent)
 
-        importMenu = QtGui.QMenu(self.tr("Import"), self)
-
-        if ImportNumizmat.isAvailable():
-            importNumizmatAct = QtGui.QAction(
-                                    createIcon('numizmat.ico'),
-                                    self.tr("Numizmat 2.1"), self)
-            importNumizmatAct.triggered.connect(self.importNumizmat)
-            importMenu.addAction(importNumizmatAct)
-
-        if ImportCabinet.isAvailable():
-            importCabinetAct = QtGui.QAction(
-                                    createIcon('cabinet.ico'),
-                                    self.tr("Cabinet 2.0.2.0, 2011"), self)
-            importCabinetAct.triggered.connect(self.importCabinet)
-            importMenu.addAction(importCabinetAct)
-
-        if ImportCoinsCollector.isAvailable():
-            importCoinsCollectorAct = QtGui.QAction(
-                                    createIcon('CoinsCollector.ico'),
-                                    self.tr("CoinsCollector 2.6"), self)
-            importCoinsCollectorAct.triggered.connect(
-                                                    self.importCoinsCollector)
-            importMenu.addAction(importCoinsCollectorAct)
-
-        if ImportCoinManage.isAvailable():
-            importCoinManageAct = QtGui.QAction(
-                                    createIcon('CoinManage.ico'),
-                                    self.tr("CoinManage 2011"), self)
-            importCoinManageAct.triggered.connect(self.importCoinManage)
-            importMenu.addAction(importCoinManageAct)
-
-        if ImportCollectionStudio.isAvailable():
-            importCollectionStudioAct = QtGui.QAction(
-                                    createIcon('CollectionStudio.ico'),
-                                    self.tr("Collection Studio 3.65"), self)
-            importCollectionStudioAct.triggered.connect(
-                                                self.importCollectionStudio)
-            importMenu.addAction(importCollectionStudioAct)
-
         collectionMenu = menubar.addMenu(self.tr("Collection"))
         collectionMenu.addAction(newCollectionAct)
         collectionMenu.addAction(openCollectionAct)
@@ -142,8 +101,6 @@ class MainWindow(QtGui.QMainWindow):
         collectionMenu.addAction(vacuumCollectionAct)
         collectionMenu.addAction(passwordCollectionAct)
         collectionMenu.addAction(descriptionCollectionAct)
-        collectionMenu.addSeparator()
-        collectionMenu.addMenu(importMenu)
         collectionMenu.addSeparator()
 
         self.latestActions = []
@@ -276,61 +233,6 @@ class MainWindow(QtGui.QMainWindow):
                 # Process running as Python arg
                 argv.append(sys.argv[0])
             QtCore.QProcess.startDetached(program, argv)
-
-    def importNumizmat(self):
-        defaultDir = ImportNumizmat.defaultDir()
-        file = QtGui.QFileDialog.getOpenFileName(self,
-                                self.tr("Select file"), defaultDir, "*.fdb")
-        if file:
-            imp = ImportNumizmat(self)
-            imp.importData(file, self.viewTab.currentModel())
-
-    def importCabinet(self):
-        defaultDir = ImportCabinet.defaultDir()
-        directory = QtGui.QFileDialog.getExistingDirectory(self,
-                                self.tr("Select directory"), defaultDir)
-        if directory:
-            imp = ImportCabinet(self)
-            imp.importData(directory, self.viewTab.currentModel())
-
-    def importCoinsCollector(self):
-        defaultDir = ImportCoinsCollector.defaultDir()
-        directory = QtGui.QFileDialog.getExistingDirectory(self,
-                                self.tr("Select directory"), defaultDir)
-        if directory:
-            imp = ImportCoinsCollector(self)
-            imp.importData(directory, self.viewTab.currentModel())
-
-    def importCoinManage(self):
-        defaultDir = ImportCoinManage.defaultDir()
-        file = QtGui.QFileDialog.getOpenFileName(self,
-                                self.tr("Select file"), defaultDir, "*.mdb")
-        if file:
-            btn = QtGui.QMessageBox.question(self, self.tr("Importing"),
-                                self.tr("Import pre-defined coins?"),
-                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                                QtGui.QMessageBox.Yes)
-            if btn == QtGui.QMessageBox.Yes:
-                imp = ImportCoinManagePredefined(self)
-                res = imp.importData(file, self.viewTab.currentModel())
-                if not res:
-                    return
-
-            imp = ImportCoinManage(self)
-            imp.importData(file, self.viewTab.currentModel())
-
-    def importCollectionStudio(self):
-        QtGui.QMessageBox.information(self, self.tr("Importing"),
-                self.tr("Before importing you should export existing "
-                        "collection from Collection Studio to XML Table "
-                        "(choose Collection Studio menu Tools > Export...)."))
-
-        defaultDir = ImportCollectionStudio.defaultDir()
-        file = QtGui.QFileDialog.getOpenFileName(self,
-                                self.tr("Select file"), defaultDir, "*.xml")
-        if file:
-            imp = ImportCollectionStudio(self)
-            imp.importData(file, self.viewTab.currentModel())
 
     def addCoin(self):
         model = self.viewTab.currentModel()

@@ -20,35 +20,7 @@
 # DOCS
 ###############################################################################
 
-"""**OpenNumismat** is a handy and reliable application aimed at coin lovers,
-numismatists or amateurs looking to create a numismatics collection.
-
-With **OpenNumismat**, you will be able to create, organize and manage your own
-coin catalogue with detailed description and photos for each of the items.
-
-Main features:
-
-- More than 60 customizable fields to describe the coin
-- Up to 7 photos coins (insert image from file, clipboard, download from the
-  Web at URL)
-- The grouping, filters and sorting to facilitate the retrieval of coins in the
-  catalog
-- Generate and print reports, saving as HTML, PDF, MS Word
-- Export customized lists as MS Excel, HTML and CSV
-- Duplication of coins to quickly add a similar coin
-- Batch edit coins
-- Ability to add and customize the lists to display the required data
-- Does not require additional software to work with a database
-- Importing from CoinsCollector, Numizmat 2, Cabinet, CoinManage 2011, 2013
-  and Collection Studio 3.65 (additional software may be required)
-- Support languages: English, Russian, Ukranian, Spanish, Hungarian
-- Cross-platform: Windows, Linux, MacOS X
-
-.. image:: http://wiki.open-numismat.googlecode.com/git/images/screenMain.png
-
-OpenNumismat based on PyQt framework with SQLite database engine to store data
-collection.
-"""
+"""**NumismatTracker** is a numismatic auction price tracker."""
 
 
 ###############################################################################
