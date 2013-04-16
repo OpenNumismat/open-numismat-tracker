@@ -105,8 +105,8 @@ class CollectionModel(QSqlTableModel):
         record.setNull('id')  # remove ID value from record
         record.setValue('createdat', record.value('updatedat'))
 
-        for field in ['obverseimg', 'reverseimg', 'edgeimg',
-                      'photo1', 'photo2', 'photo3', 'photo4']:
+        for field in ['photo1', 'photo2', 'photo3', 'photo4',
+                      'photo5', 'photo6', 'photo7', 'photo8']:
             if not record.isNull(field):
                 query = QSqlQuery(self.database())
                 query.prepare("INSERT INTO images (title, image) VALUES (?, ?)")
@@ -124,8 +124,8 @@ class CollectionModel(QSqlTableModel):
 
     def setRecord(self, row, record):
         self._updateRecord(record)
-        for field in ['obverseimg', 'reverseimg', 'edgeimg',
-                      'photo1', 'photo2', 'photo3', 'photo4']:
+        for field in ['photo1', 'photo2', 'photo3', 'photo4',
+                      'photo5', 'photo6', 'photo7', 'photo8']:
             img_id = record.value(field + '_id')
             if record.isNull(field):
                 if not record.isNull(field + '_id'):
@@ -161,8 +161,8 @@ class CollectionModel(QSqlTableModel):
         else:
             record = super(CollectionModel, self).record()
 
-        for field in ['obverseimg', 'reverseimg', 'edgeimg',
-                      'photo1', 'photo2', 'photo3', 'photo4']:
+        for field in ['photo1', 'photo2', 'photo3', 'photo4',
+                      'photo5', 'photo6', 'photo7', 'photo8']:
             record.append(QSqlField(field + '_title'))
             record.append(QSqlField(field + '_id'))
 
@@ -181,8 +181,8 @@ class CollectionModel(QSqlTableModel):
 
     def removeRow(self, row):
         record = super(CollectionModel, self).record(row)
-        for field in ['obverseimg', 'reverseimg', 'edgeimg',
-                      'photo1', 'photo2', 'photo3', 'photo4']:
+        for field in ['photo1', 'photo2', 'photo3', 'photo4',
+                      'photo5', 'photo6', 'photo7', 'photo8']:
             if not record.isNull(field):
                 query = QSqlQuery(self.database())
                 query.prepare("DELETE FROM images WHERE id=?")
@@ -220,29 +220,29 @@ class CollectionModel(QSqlTableModel):
                     else:
                         scaledImage = image
 
-                    if field.name == 'obverseimg':
+                    if field.name == 'photo1':
                         obverseImage = scaledImage
-                    if field.name == 'reverseimg':
+                    if field.name == 'photo2':
                         reverseImage = scaledImage
 
                     scaledImage.save(buffer, self.IMAGE_FORMAT)
                     record.setValue(field.name, ba)
 
         # Creating preview image for list
-        if record.isNull('obverseimg') and record.isNull('reverseimg'):
+        if record.isNull('photo1') and record.isNull('photo2'):
             record.setNull('image')
         else:
             # Get height of list view for resizing images
             tmp = QtGui.QTableView()
             height = int(tmp.verticalHeader().defaultSectionSize() * 1.5 - 1)
 
-            if not record.isNull('obverseimg') and obverseImage.isNull():
-                obverseImage.loadFromData(record.value('obverseimg'))
+            if not record.isNull('photo1') and obverseImage.isNull():
+                obverseImage.loadFromData(record.value('photo1'))
             if not obverseImage.isNull():
                 obverseImage = obverseImage.scaledToHeight(height,
                                                     Qt.SmoothTransformation)
-            if not record.isNull('reverseimg') and reverseImage.isNull():
-                reverseImage.loadFromData(record.value('reverseimg'))
+            if not record.isNull('photo2') and reverseImage.isNull():
+                reverseImage.loadFromData(record.value('photo2'))
             if not reverseImage.isNull():
                 reverseImage = reverseImage.scaledToHeight(height,
                                                     Qt.SmoothTransformation)
@@ -252,10 +252,10 @@ class CollectionModel(QSqlTableModel):
             image.fill(QtGui.QColor(Qt.white).rgb())
 
             paint = QtGui.QPainter(image)
-            if not record.isNull('obverseimg'):
+            if not record.isNull('photo1'):
                 paint.drawImage(QtCore.QRectF(0, 0, obverseImage.width(), height), obverseImage,
                                 QtCore.QRectF(0, 0, obverseImage.width(), height))
-            if not record.isNull('reverseimg'):
+            if not record.isNull('photo2'):
                 paint.drawImage(QtCore.QRectF(obverseImage.width(), 0, reverseImage.width(), height), reverseImage,
                                 QtCore.QRectF(0, 0, reverseImage.width(), height))
             paint.end()
@@ -324,12 +324,10 @@ class CollectionModel(QSqlTableModel):
         super(CollectionModel, self).setFilter(combinedFilter)
 
     def isExist(self, record):
-        fields = ['title', 'value', 'unit', 'country', 'period', 'year',
-                  'mint', 'mintmark', 'type', 'series', 'subjectshort',
-                  'status', 'metal', 'quality', 'paydate', 'payprice',
-                  'saller', 'payplace', 'saledate', 'saleprice', 'buyer',
-                  'saleplace', 'variety', 'obversevar', 'reversevar',
-                  'edgevar']
+        fields = ['denomination', 'country', 'period', 'year', 'grade',
+                  'mintmark', 'category', 'subject',
+                  'material', 'quality', 'date', 'price',
+                  'saller', 'auction', 'auctionnum', 'buyer', 'variety']
         filterParts = [field + '=?' for field in fields]
         sqlFilter = ' AND '.join(filterParts)
 

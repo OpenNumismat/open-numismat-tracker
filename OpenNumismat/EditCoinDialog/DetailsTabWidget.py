@@ -24,7 +24,6 @@ class DetailsTabWidget(QtGui.QTabWidget):
         self.createCoinPage()
         self.createTrafficPage()
         self.createParametersPage()
-        self.createClassificationPage()
 
     def createCoinPage(self):
         main = self.mainDetailsLayout()
@@ -40,16 +39,12 @@ class DetailsTabWidget(QtGui.QTabWidget):
     def createParametersPage(self):
         parameters = self.parametersLayout()
 
-        title = QApplication.translate('DetailsTabWidget', "Parameters")
-        self.addTabPage(title, [parameters, self.Stretch])
-
-    def createClassificationPage(self):
         catalogue = self.catalogueLayout()
         rarity = self.rarityLayout()
         variation = self.variationLayout()
 
-        title = QApplication.translate('DetailsTabWidget', "Classification")
-        self.addTabPage(title, [catalogue, rarity, self.Stretch,
+        title = QApplication.translate('DetailsTabWidget', "Parameters")
+        self.addTabPage(title, [parameters, self.Stretch, catalogue, rarity,
                                 variation])
 
     def _layoutToWidget(self, layout):
@@ -281,7 +276,6 @@ class FormDetailsTabWidget(DetailsTabWidget):
         self.createCoinPage()
         self.createTrafficPage()
         self.createParametersPage()
-        self.createClassificationPage()
         self.createImagePage1()
         self.createImagePage2()
 
@@ -326,11 +320,7 @@ class FormDetailsTabWidget(DetailsTabWidget):
         layout = BaseFormGroupBox(self.tr("Main details"), parent)
         layout.layout.columnCount = 6
 
-        btn = QtGui.QPushButton(self.tr("Generate"), parent)
-        btn.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        btn.clicked.connect(self.clickGenerateTitle)
-        layout.addRow(self.items['title'], btn)
-
+        layout.addRow(self.items['title'])
         layout.addRow(self.items['country'])
         layout.addRow(self.items['period'])
         layout.addRow(self.items['denomination'])
@@ -354,15 +344,13 @@ class FormDetailsTabWidget(DetailsTabWidget):
         return layout
 
     def _createTrafficParts(self, index=0):
-        self.items['payprice'].widget().textChanged.disconnect(self.payCommissionChanged)
-        self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
+        self.items['price'].widget().textChanged.disconnect(self.payCommissionChanged)
+        self.items['paid'].widget().textChanged.disconnect(self.payTotalPriceChanged)
         self.payCommission.textChanged.disconnect(self.payCommissionChanged)
-        self.items['saleprice'].widget().textChanged.disconnect(self.saleCommissionChanged)
-        self.items['totalsaleprice'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
+        self.items['bailed'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
         self.saleCommission.textChanged.disconnect(self.saleCommissionChanged)
-        self.items['saleprice'].widget().textChanged.disconnect(self.items['payprice'].widget().setText)
 
-        pageParts = super(FormDetailsTabWidget, self)._createTrafficParts(index)
+        pageParts = self.passLayout()
 
         self.oldTrafficIndex = index
 
@@ -376,9 +364,9 @@ class FormDetailsTabWidget(DetailsTabWidget):
         validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.payCommission.setValidator(validator)
 
-        self.items['payprice'].widget().textChanged.connect(self.payCommissionChanged)
+        self.items['price'].widget().textChanged.connect(self.payCommissionChanged)
         self.payCommission.textChanged.connect(self.payCommissionChanged)
-        self.items['totalpayprice'].widget().textChanged.connect(self.payTotalPriceChanged)
+        self.items['paid'].widget().textChanged.connect(self.payTotalPriceChanged)
 
         return item
 
@@ -390,52 +378,52 @@ class FormDetailsTabWidget(DetailsTabWidget):
         validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.saleCommission.setValidator(validator)
 
-        self.items['saleprice'].widget().textChanged.connect(self.saleCommissionChanged)
+        self.items['price'].widget().textChanged.connect(self.saleCommissionChanged)
         self.saleCommission.textChanged.connect(self.saleCommissionChanged)
-        self.items['totalsaleprice'].widget().textChanged.connect(self.saleTotalPriceChanged)
+        self.items['bailed'].widget().textChanged.connect(self.saleTotalPriceChanged)
 
         return item
 
     def payCommissionChanged(self, text):
-        self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
+        self.items['paid'].widget().textChanged.disconnect(self.payTotalPriceChanged)
 
-        price = textToFloat(self.items['payprice'].value())
+        price = textToFloat(self.items['price'].value())
         text = self.payCommission.text().strip()
         if len(text) > 0 and text[-1] == '%':
             commission = price * textToFloat(text[0:-1]) / 100
         else:
             commission = textToFloat(text)
-        self.items['totalpayprice'].widget().setText(floatToText(price + commission))
+        self.items['paid'].widget().setText(floatToText(price + commission))
 
-        self.items['totalpayprice'].widget().textChanged.connect(self.payTotalPriceChanged)
+        self.items['paid'].widget().textChanged.connect(self.payTotalPriceChanged)
 
     def payTotalPriceChanged(self, text):
         self.payCommission.textChanged.disconnect(self.payCommissionChanged)
 
-        price = textToFloat(self.items['payprice'].value())
-        totalPrice = textToFloat(self.items['totalpayprice'].value())
+        price = textToFloat(self.items['price'].value())
+        totalPrice = textToFloat(self.items['bailed'].value())
         self.payCommission.setText(floatToText(totalPrice - price))
 
         self.payCommission.textChanged.connect(self.payCommissionChanged)
 
     def saleCommissionChanged(self, text):
-        self.items['totalsaleprice'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
+        self.items['bailed'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
 
-        price = textToFloat(self.items['saleprice'].value())
+        price = textToFloat(self.items['price'].value())
         text = self.saleCommission.text().strip()
         if len(text) > 0 and text[-1] == '%':
             commission = price * textToFloat(text[0:-1]) / 100
         else:
             commission = textToFloat(text)
-        self.items['totalsaleprice'].widget().setText(floatToText(price - commission))
+        self.items['bailed'].widget().setText(floatToText(price - commission))
 
-        self.items['totalsaleprice'].widget().textChanged.connect(self.saleTotalPriceChanged)
+        self.items['bailed'].widget().textChanged.connect(self.saleTotalPriceChanged)
 
     def saleTotalPriceChanged(self, text):
         self.saleCommission.textChanged.disconnect(self.saleCommissionChanged)
 
-        price = textToFloat(self.items['saleprice'].value())
-        totalPrice = textToFloat(self.items['totalsaleprice'].value())
+        price = textToFloat(self.items['price'].value())
+        totalPrice = textToFloat(self.items['bailed'].value())
         self.saleCommission.setText(floatToText(price - totalPrice))
 
         self.saleCommission.textChanged.connect(self.saleCommissionChanged)

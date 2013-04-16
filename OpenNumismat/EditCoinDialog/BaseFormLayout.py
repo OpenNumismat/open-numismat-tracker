@@ -65,8 +65,6 @@ class FormItem(object):
             self._widget = EdgeImageEdit(field, parent)
         elif self._type == Type.Date:
             self._widget = DateEdit(parent)
-        elif self._type == Type.Status:
-            self._widget = StatusEdit(parent)
         elif self._type == Type.DateTime:
             self._widget = DateTimeEdit(parent)
         else:
@@ -124,8 +122,6 @@ class FormItem(object):
             return self._widget.value()
         elif isinstance(self._widget, ImageEdit):
             return self._widget.data()
-        elif isinstance(self._widget, StatusEdit):
-            return self._widget.data()
         else:
             return self._widget.text()
 
@@ -138,8 +134,6 @@ class FormItem(object):
             self._widget.setValue(float(value))
         elif isinstance(self._widget, QtGui.QDateTimeEdit):
             self._widget.setDate(QDate.fromString(str(value), Qt.ISODate))
-        elif isinstance(self._widget, StatusEdit):
-            self._widget.setCurrentValue(value)
         elif isinstance(self._widget, TextEdit):
             self._widget.setText(str(value))
         else:
@@ -147,10 +141,7 @@ class FormItem(object):
             self._widget.home(False)
 
     def clear(self):
-        if isinstance(self._widget, StatusEdit):
-            self._widget.setCurrentValue('demo')
-        else:
-            self._widget.clear()
+        self._widget.clear()
 
 
 class BaseFormLayout(QtGui.QGridLayout):

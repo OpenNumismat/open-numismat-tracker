@@ -108,16 +108,6 @@ class EditCoinDialog(QtGui.QDialog):
 
     def save(self):
         # Clear unused fields
-        if self.items['status'].widget().data() in ['demo', 'wish']:
-            for key in ['paydate', 'payprice', 'totalpayprice', 'saller',
-                        'payplace', 'payinfo', 'saledate', 'saleprice',
-                        'totalsaleprice', 'buyer', 'saleplace', 'saleinfo']:
-                self.items[key].clear()
-        elif self.items['status'].widget().data() in ['owned', 'sale']:
-            for key in ['saledate', 'saleprice', 'totalsaleprice', 'buyer',
-                        'saleplace', 'saleinfo']:
-                self.items[key].clear()
-
         if not self.usedFields:
             if not self.items['title'].value():
                 result = QtGui.QMessageBox.warning(self, self.tr("Save"),
@@ -128,8 +118,8 @@ class EditCoinDialog(QtGui.QDialog):
                     return
 
         # Checking that TotalPrice not less than Price
-        payprice = self.items['payprice'].value()
-        totalpayprice = self.items['totalpayprice'].value()
+        payprice = self.items['price'].value()
+        totalpayprice = self.items['paid'].value()
         if totalpayprice and float(totalpayprice) < 0:
             result = QtGui.QMessageBox.warning(self, self.tr("Save"),
                             self.tr("Total paid price is negative. Save?"),
@@ -146,8 +136,8 @@ class EditCoinDialog(QtGui.QDialog):
                             QtGui.QMessageBox.No)
                 if result != QtGui.QMessageBox.Save:
                     return
-        saleprice = self.items['saleprice'].value()
-        totalsaleprice = self.items['totalsaleprice'].value()
+        saleprice = self.items['price'].value()
+        totalsaleprice = self.items['bailed'].value()
         if totalsaleprice and float(totalsaleprice) < 0:
             result = QtGui.QMessageBox.warning(self, self.tr("Save"),
                             self.tr("Total bailed price is negative. Save?"),
