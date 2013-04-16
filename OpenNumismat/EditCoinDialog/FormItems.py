@@ -3,7 +3,6 @@ import locale
 from PyQt4 import QtGui
 from PyQt4.QtCore import QMargins, QUrl, QDate, Qt
 
-from OpenNumismat.Collection.CollectionFields import Statuses
 from OpenNumismat.Tools.Gui import createIcon
 
 
@@ -224,33 +223,6 @@ class LineEditRef(QtGui.QWidget):
                 reference.model.setFilter('parentid IS NULL')
                 reference.parentIndex = None
                 dependent.setText(text)
-
-
-class StatusEdit(QtGui.QComboBox):
-    def __init__(self, parent=None):
-        super(StatusEdit, self).__init__(parent)
-
-        for statusTitle in Statuses.values():
-            self.addItem(statusTitle)
-
-    def data(self):
-        currentIndex = self.currentIndex()
-        if currentIndex < 0:
-            currentIndex = 0
-
-        return Statuses.keys()[currentIndex]
-
-    def clear(self):
-        self.setCurrentIndex(-1)
-
-    def setCurrentValue(self, value):
-        index = -1
-        for status, statusTitle in Statuses.items():
-            if status == value:
-                index = self.findText(statusTitle)
-
-        if index >= 0:
-            self.setCurrentIndex(index)
 
 
 class ShortLineEdit(QtGui.QLineEdit):

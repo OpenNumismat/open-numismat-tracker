@@ -16,10 +16,9 @@ class TreeParam(QtCore.QObject):
         self._load()
         if not self._params:
             allFields = self.fields
-            self._params = [[allFields.type, ], [allFields.country, ],
+            self._params = [[allFields.category, ], [allFields.country, ],
                             [allFields.period, ],
-                            [allFields.value, allFields.unit],
-                            [allFields.series, ], [allFields.year, ]]
+                            [allFields.denomination, ], [allFields.year, ]]
 
     def params(self):
         return self._params

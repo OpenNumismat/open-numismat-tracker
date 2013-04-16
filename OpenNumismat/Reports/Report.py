@@ -12,16 +12,13 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
-from OpenNumismat.Collection.CollectionFields import Statuses
 from OpenNumismat.Tools import Gui
 import OpenNumismat
 
 
 def formatFields(field, data):
     try:
-        if field.name == 'status':
-            text = Statuses[data]
-        elif field.type == Type.BigInt:
+        if field.type == Type.BigInt:
             text = locale.format("%d", int(data), grouping=True)
         elif field.type == Type.Money:
             text = locale.format("%.2f", float(data), grouping=True)

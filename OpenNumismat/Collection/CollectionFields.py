@@ -43,62 +43,15 @@ class FieldTypes():
         elif type_ == FieldTypes.PreviewImage:
             sql_type = 'BLOB'
         elif type_ == FieldTypes.Image:
-            sql_type = 'INTEGER'
+            sql_type = 'TEXT'
         elif type_ == FieldTypes.Value:
             sql_type = 'NUMERIC'
-        elif type_ == FieldTypes.Status:
-            sql_type = 'TEXT'
         elif type_ == FieldTypes.DateTime:
             sql_type = 'TEXT'
-        elif type_ == FieldTypes.EdgeImage:
-            sql_type = 'INTEGER'
         else:
             raise
 
         return sql_type
-
-
-class Status(dict):
-    Keys = ('demo', 'pass', 'owned', 'sold', 'sale', 'wish')
-    Titles = (
-        QT_TRANSLATE_NOOP("Status", "Demo"),
-        QT_TRANSLATE_NOOP("Status", "Pass"),
-        QT_TRANSLATE_NOOP("Status", "Owned"),
-        QT_TRANSLATE_NOOP("Status", "Sold"),
-        QT_TRANSLATE_NOOP("Status", "Sale"),
-        QT_TRANSLATE_NOOP("Status", "Wish"),
-    )
-
-    def __init__(self):
-        for key, value in zip(self.Keys, self.Titles):
-            dict.__setitem__(self, key, value)
-
-    def keys(self):
-        return self.Keys
-
-    def items(self):
-        result = []
-        for key in self.Keys:
-            result.append((key, self.__getitem__(key)))
-        return result
-
-    def values(self):
-        result = []
-        for key in self.Keys:
-            result.append(self.__getitem__(key))
-        return result
-
-    def __getitem__(self, key):
-        try:
-            if isinstance(key, int):
-                value = dict.__getitem__(self, self.Keys[key])
-            else:
-                value = dict.__getitem__(self, key)
-            return QApplication.translate("Status", value)
-        except KeyError:
-            return None
-
-Statuses = Status()
 
 
 class CollectionField():
@@ -118,78 +71,47 @@ class CollectionFieldsBase(QObject):
                 ('id', self.tr("ID"), Type.BigInt),
 
                 ('title', self.tr("Name"), Type.String),
-                ('value', self.tr("Value"), Type.Money),
-                ('unit', self.tr("Unit"), Type.String),
+                ('denomination', self.tr("Denomination"), Type.String),
                 ('country', self.tr("Country"), Type.String),
-                ('year', self.tr("Year"), Type.Number),
                 ('period', self.tr("Period"), Type.String),
-                ('mint', self.tr("Mint"), Type.String),
+                ('year', self.tr("Year"), Type.Number),
                 ('mintmark', self.tr("Mint mark"), Type.ShortString),
-                ('issuedate', self.tr("Date of issue"), Type.Date),
-                ('type', self.tr("Type"), Type.String),
-                ('series', self.tr("Series"), Type.String),
-                ('subjectshort', self.tr("Subject"), Type.String),
-                ('status', self.tr("Status"), Type.Status),
+                ('category', self.tr("Category"), Type.String),
+                ('subject', self.tr("Subject"), Type.String),
                 ('material', self.tr("Material"), Type.String),
-                ('fineness', self.tr("Fineness"), Type.Number),  # 4 digits for Canadian Gold Maple Leaf
-                ('shape', self.tr("Shape"), Type.String),
                 ('diameter', self.tr("Diameter"), Type.Value),
-                ('thickness', self.tr("Thickness"), Type.Value),
+                ('fineness', self.tr("Fineness"), Type.Value),
                 ('weight', self.tr("Weight"), Type.Value),
                 ('grade', self.tr("Grade"), Type.String),
-                ('edge', self.tr("Type"), Type.String),
-                ('edgelabel', self.tr("Label"), Type.String),
-                ('obvrev', self.tr("ObvRev"), Type.String),
-                ('quality', self.tr("Quality"), Type.String),
-                ('mintage', self.tr("Mintage"), Type.BigInt),
-                ('dateemis', self.tr("Emission period"), Type.String),
                 ('catalognum1', self.tr("1#"), Type.String),
                 ('catalognum2', self.tr("2#"), Type.String),
                 ('catalognum3', self.tr("3#"), Type.String),
-                ('catalognum4', self.tr("4#"), Type.String),
                 ('rarity', self.tr("Rarity"), Type.String),
-                ('price1', self.tr("Fine"), Type.Money),
-                ('price2', self.tr("VF"), Type.Money),
-                ('price3', self.tr("XF"), Type.Money),
-                ('price4', self.tr("Unc"), Type.Money),
                 ('variety', self.tr("Variety"), Type.String),
-                ('obversevar', self.tr("Obverse"), Type.String),
-                ('reversevar', self.tr("Reverse"), Type.String),
-                ('edgevar', self.tr("Edge"), Type.String),
-                ('paydate', self.tr("Date"), Type.Date),
-                ('payprice', self.tr("Price"), Type.Money),
-                ('totalpayprice', self.tr("Paid"), Type.Money),
+                ('paid', self.tr("Paid"), Type.Money),
                 ('saller', self.tr("Saller"), Type.String),
-                ('payplace', self.tr("Place"), Type.String),
-                ('payinfo', self.tr("Info"), Type.Text),
-                ('saledate', self.tr("Date"), Type.Date),
-                ('saleprice', self.tr("Price"), Type.Money),
-                ('totalsaleprice', self.tr("Bailed"), Type.Money),
+                ('date', self.tr("Date"), Type.Date),
+                ('price', self.tr("Price"), Type.Money),
+                ('bailed', self.tr("Bailed"), Type.Money),
                 ('buyer', self.tr("Buyer"), Type.String),
-                ('saleplace', self.tr("Place"), Type.String),
-                ('saleinfo', self.tr("Info"), Type.Text),
-                ('note', self.tr("Note"), Type.Text),
+                ('bids', self.tr("Bids"), Type.String),
+                ('bidders', self.tr("Bidders"), Type.String),
+                ('auction', self.tr("Auction"), Type.String),
+                ('auctionnum', self.tr("Auction #"), Type.BigInt),
+                ('info', self.tr("Info"), Type.Text),
                 ('image', self.tr("Image"), Type.PreviewImage),
-                ('obverseimg', self.tr("Obverse"), Type.Image),
-                ('obversedesign', self.tr("Design"), Type.Text),
-                ('obversedesigner', self.tr("Designer"), Type.String),
-                ('reverseimg', self.tr("Reverse"), Type.Image),
-                ('reversedesign', self.tr("Design"), Type.Text),
-                ('reversedesigner', self.tr("Designer"), Type.String),
-                ('edgeimg', self.tr("Edge"), Type.EdgeImage),
-                ('subject', self.tr("Subject"), Type.Text),
                 ('photo1', self.tr("Photo 1"), Type.Image),
                 ('photo2', self.tr("Photo 2"), Type.Image),
                 ('photo3', self.tr("Photo 3"), Type.Image),
                 ('photo4', self.tr("Photo 4"), Type.Image),
-                ('defect', self.tr("Defect"), Type.String),
-                ('storage', self.tr("Storage"), Type.String),
-                ('features', self.tr("Features"), Type.Text),
-                ('createdat', self.tr("Created at"), Type.DateTime),
-                ('updatedat', self.tr("Updated at"), Type.DateTime),
+                ('photo5', self.tr("Photo 5"), Type.Image),
+                ('photo6', self.tr("Photo 6"), Type.Image),
+                ('photo7', self.tr("Photo 7"), Type.Image),
+                ('photo8', self.tr("Photo 8"), Type.Image),
                 ('quantity', self.tr("Quantity"), Type.BigInt),
                 ('url', self.tr("URL"), Type.String),
-                ('barcode', self.tr("Barcode"), Type.String),
+                ('createdat', self.tr("Created at"), Type.DateTime),
+                ('updatedat', self.tr("Updated at"), Type.DateTime),
             ]
 
         self.fields = []

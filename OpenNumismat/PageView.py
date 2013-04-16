@@ -8,7 +8,6 @@ from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
 from OpenNumismat.EditCoinDialog.EditCoinDialog import EditCoinDialog
 from OpenNumismat.CustomizeTreeDialog import CustomizeTreeDialog
 from OpenNumismat.Tools import Gui
-from OpenNumismat.Collection.CollectionFields import Statuses
 from OpenNumismat.EditCoinDialog.DetailsTabWidget import DetailsTabWidget
 
 
@@ -169,10 +168,7 @@ class TreeView(QtGui.QTreeWidget):
 
                 text = str(record.value(i))
                 if text:
-                    if fields[i] == 'status':
-                        data.append(Statuses[text])
-                    else:
-                        data.append(text)
+                    data.append(text)
                     escapedText = text.replace("'", "''")
                     filterSql.append("%s='%s'" % (fields[i], escapedText))
 

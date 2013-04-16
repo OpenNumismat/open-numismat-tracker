@@ -12,7 +12,6 @@ from OpenNumismat.Collection.Description import CollectionDescription
 from OpenNumismat.Reference.Reference import CrossReferenceSection
 from OpenNumismat.Reference.ReferenceDialog import AllReferenceDialog
 from OpenNumismat.EditCoinDialog.EditCoinDialog import EditCoinDialog
-from OpenNumismat.Collection.CollectionFields import Statuses
 from OpenNumismat.Collection.VersionUpdater import updateCollection
 from OpenNumismat.Tools.CursorDecorators import waitCursorDecorator
 from OpenNumismat.Tools import Gui
@@ -46,9 +45,7 @@ class CollectionModel(QSqlTableModel):
             data = super(CollectionModel, self).data(index, role)
             field = self.fields.fields[index.column()]
             try:
-                if field.name == 'status':
-                    text = Statuses[data]
-                elif field.type == Type.BigInt:
+                if field.type == Type.BigInt:
                     text = locale.format("%d", int(data), grouping=True)
                 elif field.type == Type.Money:
                     text = locale.format("%.2f", float(data), grouping=True)
@@ -444,6 +441,7 @@ class Collection(QtCore.QObject):
             if result == QtGui.QDialog.Rejected:
                 return False
 
+        print(fileName)
         self.fields = CollectionFields(self.db)
 
         updateCollection(self)

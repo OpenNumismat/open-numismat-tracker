@@ -3,7 +3,6 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtSql import QSqlQuery
 
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
-from OpenNumismat.Collection.CollectionFields import Statuses
 from OpenNumismat.Tools.Gui import createIcon
 
 
@@ -90,23 +89,6 @@ class FilterMenuButton(QtGui.QPushButton):
 
             if blanksCount > 0:
                 hasBlanks = True
-        elif self.model.columnType(self.fieldid) in [Type.Status, ]:
-            filtersSql = self.filtersToSql(filters.values())
-            if filtersSql:
-                filtersSql = 'WHERE ' + filtersSql
-            sql = "SELECT DISTINCT %s FROM coins %s" % (self.columnName, filtersSql)
-            query = QSqlQuery(sql, self.db)
-
-            while query.next():
-                value = query.record().value(0)
-                label = Statuses[value]
-                item = QtGui.QListWidgetItem(label, self.listWidget)
-                item.setData(Qt.UserRole, value)
-                if value in appliedValues:
-                    item.setCheckState(Qt.Unchecked)
-                else:
-                    item.setCheckState(Qt.Checked)
-                self.listWidget.addItem(item)
         else:
             filtersSql = self.filtersToSql(filters.values())
             if filtersSql:

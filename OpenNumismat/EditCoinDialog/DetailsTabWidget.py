@@ -24,7 +24,6 @@ class DetailsTabWidget(QtGui.QTabWidget):
         self.createCoinPage()
         self.createTrafficPage()
         self.createParametersPage()
-        self.createDesignPage()
         self.createClassificationPage()
 
     def createCoinPage(self):
@@ -34,38 +33,24 @@ class DetailsTabWidget(QtGui.QTabWidget):
         self.addTabPage(title, [main, self.Stretch, state])
 
     def createTrafficPage(self):
-        self.oldTrafficIndex = 0
-        parts = self._createTrafficParts(self.oldTrafficIndex)
+        pass_ = self.passLayout()
         title = QApplication.translate('DetailsTabWidget', "Traffic")
-        self.addTabPage(title, parts)
+        self.addTabPage(title, [pass_, ])
 
     def createParametersPage(self):
         parameters = self.parametersLayout()
-        minting = self.mintingLayout()
-        note = self.noteLayout()
 
         title = QApplication.translate('DetailsTabWidget', "Parameters")
-        self.addTabPage(title, [parameters, self.Stretch, minting, note])
-
-    def createDesignPage(self):
-        obverse = self.obverseDesignLayout()
-        reverse = self.reverseDesignLayout()
-        edge = self.edgeDesignLayout()
-        subject = self.subjectLayout()
-
-        title = QApplication.translate('DetailsTabWidget', "Design")
-        self.addTabPage(title, [obverse, reverse, self.Stretch, edge, subject])
+        self.addTabPage(title, [parameters, self.Stretch])
 
     def createClassificationPage(self):
         catalogue = self.catalogueLayout()
         rarity = self.rarityLayout()
-        price = self.priceLayout()
         variation = self.variationLayout()
-        url = self.urlLayout()
 
         title = QApplication.translate('DetailsTabWidget', "Classification")
-        self.addTabPage(title, [catalogue, rarity, price, self.Stretch,
-                                variation, url])
+        self.addTabPage(title, [catalogue, rarity, self.Stretch,
+                                variation])
 
     def _layoutToWidget(self, layout):
         widget = QtGui.QWidget(self)
@@ -174,12 +159,11 @@ class DetailsTabWidget(QtGui.QTabWidget):
         layout.addRow(self.items['title'])
         layout.addRow(self.items['country'])
         layout.addRow(self.items['period'])
-        layout.addRow(self.items['value'], self.items['unit'])
+        layout.addRow(self.items['denomination'])
         layout.addRow(self.items['year'])
-        layout.addRow(self.items['mintmark'], self.items['mint'])
-        layout.addRow(self.items['type'])
-        layout.addRow(self.items['series'])
-        layout.addRow(self.items['subjectshort'])
+        layout.addRow(self.items['mintmark'])
+        layout.addRow(self.items['category'])
+        layout.addRow(self.items['subject'])
 
         return layout
 
@@ -187,44 +171,8 @@ class DetailsTabWidget(QtGui.QTabWidget):
         title = QApplication.translate('DetailsTabWidget', "State")
         layout = BaseFormGroupBox(title, parent)
 
-        layout.addRow(self.items['status'], self.items['grade'])
-        self.items['status'].widget().currentIndexChanged.connect(self.indexChangedState)
-        layout.addRow(self.items['storage'])
-        layout.addRow(self.items['quantity'], self.items['barcode'])
-        layout.addRow(self.items['defect'])
-        layout.addRow(self.items['features'])
-
-        return layout
-
-    def payLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Buy")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['paydate'], self.items['payprice'])
-
-        # Add auxiliary field
-        item = self.addPayCommission()
-
-        layout.addRow(self.items['totalpayprice'], item)
-        layout.addRow(self.items['saller'])
-        layout.addRow(self.items['payplace'])
-        layout.addRow(self.items['payinfo'])
-
-        return layout
-
-    def saleLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Sale")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['saledate'], self.items['saleprice'])
-
-        # Add auxiliary field
-        item = self.addSaleCommission()
-        layout.addRow(self.items['totalsaleprice'], item)
-
-        layout.addRow(self.items['buyer'])
-        layout.addRow(self.items['saleplace'])
-        layout.addRow(self.items['saleinfo'])
+        layout.addRow(self.items['grade'])
+        layout.addRow(self.items['quantity'])
 
         return layout
 
@@ -232,21 +180,23 @@ class DetailsTabWidget(QtGui.QTabWidget):
         title = QApplication.translate('DetailsTabWidget', "Pass")
         layout = BaseFormGroupBox(title, parent)
 
-        layout.addRow(self.items['saledate'], self.items['saleprice'])
+        layout.addRow(self.items['date'])
 
         # Add auxiliary field
         item = self.addPayCommission()
-        layout.addRow(self.items['totalpayprice'], item)
-        self.items['saleprice'].widget().textChanged.connect(self.items['payprice'].widget().setText)
+        layout.addRow(self.items['paid'], item)
 
         # Add auxiliary field
         item = self.addSaleCommission()
-        layout.addRow(self.items['totalsaleprice'], item)
+        layout.addRow(self.items['bailed'], item)
 
         layout.addRow(self.items['saller'])
         layout.addRow(self.items['buyer'])
-        layout.addRow(self.items['saleplace'])
-        layout.addRow(self.items['saleinfo'])
+        layout.addRow(self.items['bids'], self.items['bidders'])
+        layout.addRow(self.items['auction'], self.items['auctionnum'])
+        layout.addRow(self.items['url'])
+
+        layout.addRow(self.items['info'])
 
         return layout
 
@@ -256,65 +206,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
 
         layout.addRow(self.items['material'])
         layout.addRow(self.items['fineness'], self.items['weight'])
-        layout.addRow(self.items['diameter'], self.items['thickness'])
-        layout.addRow(self.items['shape'])
-        layout.addRow(self.items['obvrev'])
-
-        return layout
-
-    def mintingLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Minting")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['issuedate'], self.items['mintage'])
-        layout.addRow(self.items['dateemis'])
-
-        item = self.items['quality']
-        layout.layout.addWidget(item.label(), 2, 0)
-        layout.layout.addWidget(item.widget(), 2, 1)
-        item.widget().setSizePolicy(QtGui.QSizePolicy.Preferred,
-                                    QtGui.QSizePolicy.Fixed)
-
-        return layout
-
-    def noteLayout(self, parent=None):
-        layout = BaseFormLayout(parent)
-
-        layout.addRow(self.items['note'])
-
-        return layout
-
-    def obverseDesignLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Obverse")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['obversedesign'])
-        layout.addRow(self.items['obversedesigner'])
-
-        return layout
-
-    def reverseDesignLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Reverse")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['reversedesign'])
-        layout.addRow(self.items['reversedesigner'])
-
-        return layout
-
-    def edgeDesignLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Edge")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['edge'])
-        layout.addRow(self.items['edgelabel'])
-
-        return layout
-
-    def subjectLayout(self, parent=None):
-        layout = BaseFormLayout(parent)
-
-        layout.addRow(self.items['subject'])
+        layout.addRow(self.items['diameter'])
 
         return layout
 
@@ -335,16 +227,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
         layout = BaseFormGroupBox(title, parent)
 
         layout.addRow(self.items['catalognum1'], self.items['catalognum2'])
-        layout.addRow(self.items['catalognum3'], self.items['catalognum4'])
-
-        return layout
-
-    def priceLayout(self, parent=None):
-        title = QApplication.translate('DetailsTabWidget', "Price")
-        layout = BaseFormGroupBox(title, parent)
-
-        layout.addRow(self.items['price1'], self.items['price2'])
-        layout.addRow(self.items['price3'], self.items['price4'])
+        layout.addRow(self.items['catalognum3'])
 
         return layout
 
@@ -353,68 +236,15 @@ class DetailsTabWidget(QtGui.QTabWidget):
         layout = BaseFormGroupBox(title, parent)
 
         layout.addRow(self.items['variety'])
-        layout.addRow(self.items['obversevar'], self.items['reversevar'])
-        item = self.items['edgevar']
-        layout.layout.addWidget(item.label(), 3, 0)
-        layout.layout.addWidget(item.widget(), 3, 1)
 
         return layout
-
-    def urlLayout(self, parent=None):
-        layout = BaseFormLayout(parent)
-
-        layout.addRow(self.items['url'])
-
-        return layout
-
-    def _createTrafficParts(self, index=0):
-        pageParts = []
-        if index == 0:
-            pass
-        elif index == 1:
-            pass_ = self.passLayout()
-            pageParts.append(pass_)
-        elif index == 2:
-            pay = self.payLayout()
-            pageParts.append(pay)
-        elif index == 3:
-            pay = self.payLayout()
-            sale = self.saleLayout()
-            pageParts.extend([pay, self.Stretch, sale])
-        elif index == 4:
-            pay = self.payLayout()
-            pageParts.append(pay)
-        elif index == 5:
-            pass
-
-        self.oldTrafficIndex = index
-
-        return pageParts
-
-    def indexChangedState(self, index):
-        pageIndex = self.currentIndex()
-
-        self.removeTab(1)
-        pageParts = self._createTrafficParts(index)
-        page = self.createTabPage(pageParts)
-
-        title = QApplication.translate('DetailsTabWidget', "Traffic")
-        self.insertTab(1, page, title)
-        if len(pageParts) == 0:
-            self.setTabEnabled(1, False)
-#            self.items['grade'].widget().setEnabled(False)
-            if pageIndex == 1:
-                self.setCurrentIndex(pageIndex - 1)
-        else:
-#            self.items['grade'].widget().setEnabled(True)
-            self.setCurrentIndex(pageIndex)
 
     def addPayCommission(self):
         title = QApplication.translate('DetailsTabWidget', "Commission")
         self.payComission = FormItem(None, title, Type.Money)
 
-        self.items['payprice'].widget().textChanged.connect(self.payPriceChanged)
-        self.items['totalpayprice'].widget().textChanged.connect(self.payPriceChanged)
+        self.items['price'].widget().textChanged.connect(self.payPriceChanged)
+        self.items['paid'].widget().textChanged.connect(self.payPriceChanged)
 
         return self.payComission
 
@@ -427,14 +257,14 @@ class DetailsTabWidget(QtGui.QTabWidget):
         title = QApplication.translate('DetailsTabWidget', "Commission")
         self.saleComission = FormItem(None, title, Type.Money)
 
-        self.items['saleprice'].widget().textChanged.connect(self.salePriceChanged)
-        self.items['totalsaleprice'].widget().textChanged.connect(self.salePriceChanged)
+        self.items['price'].widget().textChanged.connect(self.salePriceChanged)
+        self.items['bailed'].widget().textChanged.connect(self.salePriceChanged)
 
         return self.saleComission
 
     def salePriceChanged(self, text):
-        price = textToFloat(self.items['saleprice'].value())
-        totalPrice = textToFloat(self.items['totalsaleprice'].value())
+        price = textToFloat(self.items['price'].value())
+        totalPrice = textToFloat(self.items['bailed'].value())
         self.saleComission.widget().setText(floatToText(price - totalPrice))
 
 
@@ -451,21 +281,17 @@ class FormDetailsTabWidget(DetailsTabWidget):
         self.createCoinPage()
         self.createTrafficPage()
         self.createParametersPage()
-        self.createDesignPage()
         self.createClassificationPage()
-        self.createImagePage()
+        self.createImagePage1()
+        self.createImagePage2()
 
-    def createDesignPage(self):
-        obverse = self.obverseDesignLayout()
-        reverse = self.reverseDesignLayout()
-        edge = self.edgeDesignLayout()
-        subject = self.subjectLayout()
+    def createImagePage1(self):
+        images = self.images1Layout()
+        self.addTabPage(self.tr("Images 1"), [images, ])
 
-        self.addTabPage(self.tr("Design"), [obverse, reverse, self.Stretch, edge, subject])
-
-    def createImagePage(self):
-        images = self.imagesLayout()
-        self.addTabPage(self.tr("Images"), [images, ])
+    def createImagePage2(self):
+        images = self.images2Layout()
+        self.addTabPage(self.tr("Images 2"), [images, ])
 
     def addItem(self, field):
         checkable = 0
@@ -487,9 +313,6 @@ class FormDetailsTabWidget(DetailsTabWidget):
         if self.reference:
             widget = self.items['country'].widget()
             widget.addDependent(self.items['period'].widget())
-            widget.addDependent(self.items['unit'].widget())
-            widget.addDependent(self.items['mint'].widget())
-            widget.addDependent(self.items['series'].widget())
 
     def fillItems(self, record):
         super(FormDetailsTabWidget, self).fillItems(record)
@@ -510,95 +333,34 @@ class FormDetailsTabWidget(DetailsTabWidget):
 
         layout.addRow(self.items['country'])
         layout.addRow(self.items['period'])
-        layout.addRow(self.items['value'], self.items['unit'])
+        layout.addRow(self.items['denomination'])
         layout.addRow(self.items['year'])
-        layout.addRow(self.items['mintmark'], self.items['mint'])
-        layout.addRow(self.items['type'])
-        layout.addRow(self.items['series'])
-        layout.addRow(self.items['subjectshort'])
+        layout.addRow(self.items['mintmark'])
+        layout.addRow(self.items['category'])
+        layout.addRow(self.items['subject'])
 
         return layout
 
-    def obverseDesignLayout(self, parent=None):
-        layout = DesignFormLayout(self.tr("Obverse"), parent)
-
-        layout.addImage(self.items['obverseimg'])
-        layout.addRow(self.items['obversedesign'])
-        layout.addRow(self.items['obversedesigner'])
-
-        return layout
-
-    def reverseDesignLayout(self, parent=None):
-        layout = DesignFormLayout(self.tr("Reverse"), parent)
-
-        layout.addImage(self.items['reverseimg'])
-        layout.addRow(self.items['reversedesign'])
-        layout.addRow(self.items['reversedesigner'])
-
-        return layout
-
-    def edgeDesignLayout(self, parent=None):
-        layout = DesignFormLayout(self.tr("Edge"), parent)
-
-        layout.addImage(self.items['edgeimg'])
-        layout.addRow(self.items['edge'])
-        layout.addRow(self.items['edgelabel'])
-
-        return layout
-
-    def imagesLayout(self, parent=None):
+    def images1Layout(self, parent=None):
         layout = ImageFormLayout(parent)
         layout.addImages([self.items['photo1'], self.items['photo2'],
                           self.items['photo3'], self.items['photo4']])
         return layout
 
-    def clickGenerateTitle(self):
-        titleParts = []
-        for key in ['value', 'unit', 'year', 'subjectshort',
-                    'mintmark', 'variety']:
-            value = self.items[key].value()
-            if not isinstance(value, str):
-                value = str(value)
-            titlePart = value.strip()
-            if titlePart:
-                if key == 'unit':
-                    titlePart = titlePart.lower()
-                if key == 'subjectshort':
-                    if len(titlePart.split()) > 1:
-                        titlePart = '"%s"' % titlePart
-                titleParts.append(titlePart)
-
-        title = ' '.join(titleParts)
-        self.items['title'].setValue(title)
+    def images2Layout(self, parent=None):
+        layout = ImageFormLayout(parent)
+        layout.addImages([self.items['photo5'], self.items['photo6'],
+                          self.items['photo7'], self.items['photo8']])
+        return layout
 
     def _createTrafficParts(self, index=0):
-        if self.oldTrafficIndex == 0:
-            pass
-        elif self.oldTrafficIndex == 1:
-            self.items['payprice'].widget().textChanged.disconnect(self.payCommissionChanged)
-            self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
-            self.payCommission.textChanged.disconnect(self.payCommissionChanged)
-            self.items['saleprice'].widget().textChanged.disconnect(self.saleCommissionChanged)
-            self.items['totalsaleprice'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
-            self.saleCommission.textChanged.disconnect(self.saleCommissionChanged)
-            self.items['saleprice'].widget().textChanged.disconnect(self.items['payprice'].widget().setText)
-        elif self.oldTrafficIndex == 2:
-            self.items['payprice'].widget().textChanged.disconnect(self.payCommissionChanged)
-            self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
-            self.payCommission.textChanged.disconnect(self.payCommissionChanged)
-        elif self.oldTrafficIndex == 3:
-            self.items['payprice'].widget().textChanged.disconnect(self.payCommissionChanged)
-            self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
-            self.payCommission.textChanged.disconnect(self.payCommissionChanged)
-            self.items['saleprice'].widget().textChanged.disconnect(self.saleCommissionChanged)
-            self.items['totalsaleprice'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
-            self.saleCommission.textChanged.disconnect(self.saleCommissionChanged)
-        elif self.oldTrafficIndex == 4:
-            self.items['payprice'].widget().textChanged.disconnect(self.payCommissionChanged)
-            self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
-            self.payCommission.textChanged.disconnect(self.payCommissionChanged)
-        elif self.oldTrafficIndex == 5:
-            pass
+        self.items['payprice'].widget().textChanged.disconnect(self.payCommissionChanged)
+        self.items['totalpayprice'].widget().textChanged.disconnect(self.payTotalPriceChanged)
+        self.payCommission.textChanged.disconnect(self.payCommissionChanged)
+        self.items['saleprice'].widget().textChanged.disconnect(self.saleCommissionChanged)
+        self.items['totalsaleprice'].widget().textChanged.disconnect(self.saleTotalPriceChanged)
+        self.saleCommission.textChanged.disconnect(self.saleCommissionChanged)
+        self.items['saleprice'].widget().textChanged.disconnect(self.items['payprice'].widget().setText)
 
         pageParts = super(FormDetailsTabWidget, self)._createTrafficParts(index)
 
