@@ -16,7 +16,7 @@ class MolotokParser(_AuctionParser):
     def verifyDomain(url):
         return (urllib.parse.urlparse(url).hostname == MolotokParser.HostName)
 
-    def __init__(self, url, parent=None):
+    def __init__(self, parent=None):
         super(MolotokParser, self).__init__(parent)
 
     def _parse(self):
@@ -111,6 +111,46 @@ class MolotokParser(_AuctionParser):
         return str(price - commission)
 
 
+class AuctionSpbPageParser(_AuctionParser):
+    HostNames = ('www.auction.spb.ru', 'auction.spb.ru')
+
+    @staticmethod
+    def verifyDomain(url):
+        hostname = urllib.parse.urlparse(url).hostname
+        return (hostname in AuctionSpbPageParser.HostNames)
+
+    def __init__(self, parent=None):
+        super(AuctionSpbPageParser, self).__init__(parent)
+
+    def _encoding(self):
+        return 'windows-1251'
+
+    def _parse(self):
+        items = []
+        hostname = 'http://' + urllib.parse.urlparse(self.url).hostname
+        table = self.html.cssselect('table tr')[4].cssselect('table td')[1].cssselect('table')[0]
+
+        for tr in table.cssselect('tr'):
+            tds = tr.cssselect('td')
+            if len(tds) >= 9:
+                url = hostname + tds[1].cssselect('a')[0].attrib['href']
+                denomination = str(tds[2].text_content())
+                year = str(tds[3].text_content())
+                mintmark = str(tds[4].text_content())
+                material = str(tds[5].text_content())
+                grade = _stringToGrade(tds[6].text_content())
+                buyer = str(tds[7].text_content())
+                bids = int(tds[8].text_content())
+                price = stringToMoney(tds[9].text_content())
+                items.append({
+                        'url': url, 'denomination': denomination, 'year': year,
+                        'mintmark': mintmark, 'material': material,
+                        'grade': grade, 'buyer': buyer, 'bids': bids,
+                        'price': price})
+
+        return items
+
+
 class AuctionSpbParser(_AuctionParser):
     HostNames = ('www.auction.spb.ru', 'auction.spb.ru')
 
@@ -118,7 +158,7 @@ class AuctionSpbParser(_AuctionParser):
     def verifyDomain(url):
         return (urllib.parse.urlparse(url).hostname in AuctionSpbParser.HostNames)
 
-    def __init__(self, url, parent=None):
+    def __init__(self, parent=None):
         super(AuctionSpbParser, self).__init__(parent)
 
     def _encoding(self):
@@ -129,54 +169,63 @@ class AuctionSpbParser(_AuctionParser):
         if table.text_content().find("Торги по лоту завершились") < 0:
             raise _NotDoneYetError()
 
-        auctionItem = AuctionItem('АукционЪ.СПб')
+        item = {}
 
         content = table.cssselect('b')[0].text_content()
         date = content.split()[1]  # convert '12:00:00 05-12-07' to '05-12-07'
         date = QtCore.QDate.fromString(date, 'dd-MM-yy')
         if date.year() < 1960:
             date = date.addYears(100)
-        auctionItem.date = date.toString(QtCore.Qt.ISODate)
+        item['date'] = date.toString(QtCore.Qt.ISODate)
 
         content = table.cssselect('strong')[2].text_content()
-        auctionItem.buyer = content.split()[-1]
+        item['buyer'] = content.split()[-1]
 
-        content = table.cssselect('strong')[1].text_content()
-        grade = content.split()[1]
-        grade = grade.replace('.', '')  # remove end dot
-        auctionItem.grade = _stringToGrade(grade)
+        content = table.cssselect('strong')[0].text_content()
+        if content[-1] == '.':
+            content = content[:-1]
+        part = content.split('\xA0', 1)[-1]  # remove 'Лот № 8607'
+        item['title'] = ' '.join(part.split())  # remove extra spaces
 
-        auctionItem.info = self.url
+#        content = table.cssselect('strong')[1].text_content()
+#        grade = content.split()[1]
+#        grade = grade.replace('.', '')  # remove end dot
+#        item['grade'] = _stringToGrade(grade)
+
+#        item['info'] = self.url
 
         if len(table.cssselect('table tr')) - 1 < 2:
-            QtGui.QMessageBox.information(self.parent(),
-                                self.tr("Parse auction lot"),
-                                self.tr("Only 1 bid"),
-                                QtGui.QMessageBox.Ok)
+            print("Only 1 bid")
 
         content = table.cssselect('strong')[2].text_content()
-        auctionItem.price = stringToMoney(content)
+        item['price'] = stringToMoney(content)
 
-        price = float(auctionItem.price)
-        auctionItem.totalPayPrice = str(price + price * 10 / 100)
+        price = float(item['price'])
+        item['totalPayPrice'] = str(price + price * 10 / 100)
 
-        auctionItem.totalSalePrice = self.totalSalePrice(auctionItem)
+        item['totalSalePrice'] = self.totalSalePrice(price)
 
-        auctionItem.images = []
+        images = []
         content = table.cssselect('a')[0]
         href = content.attrib['href']
         href = urllib.parse.urljoin(self.url, href)
-        auctionItem.images.append(href)
+        images.append(href)
 
         content = table.cssselect('a')[1]
         href = content.attrib['href']
         href = urllib.parse.urljoin(self.url, href)
-        auctionItem.images.append(href)
+        images.append(href)
+        item['images'] = images
 
-        return auctionItem
+        bidders = {}
+        for tr in table.cssselect('table')[0].cssselect('tr')[1:]:
+            bidder = tr.cssselect('td')[0].text_content()
+            bidders[bidder] = None
+        item['bidders'] = len(bidders.keys())
 
-    def totalSalePrice(self, lot):
-        price = float(lot.price)
+        return item
+
+    def totalSalePrice(self, price):
         commission = price * 15 / 100
         if commission < 35:
             commission = 35

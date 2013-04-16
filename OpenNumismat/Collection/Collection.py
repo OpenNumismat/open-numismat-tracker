@@ -106,6 +106,10 @@ class CollectionModel(QSqlTableModel):
             if self.insertedRowIndex.isValid():
                 self.rowInserted.emit(self.insertedRowIndex)
 
+    def appendRecordQuiet(self, record):
+        self.insertRecord(-1, record)
+        self.submitAll()
+
     def generateImagePath(self, img_id, create_folder=False):
         path = '%s/images/%s/%s' % (self.workingDir, img_id[0:3], img_id[3:6])
         if create_folder:

@@ -33,7 +33,7 @@ class _AuctionParser(QtCore.QObject):
 
         self.html = ''
 
-    @waitCursorDecorator
+#    @waitCursorDecorator
     def parse(self, url):
         self.readHtmlPage(url, self._encoding())
 
@@ -43,15 +43,17 @@ class _AuctionParser(QtCore.QObject):
         try:
             return self._parse()
         except _NotDoneYetError:
-            QtGui.QMessageBox.warning(self.parent(),
-                            self.tr("Parse auction lot"),
-                            self.tr("Auction not done yet"),
-                            QtGui.QMessageBox.Ok)
+            print("Auction not done yet")
+#            QtGui.QMessageBox.warning(self.parent(),
+#                            self.tr("Parse auction lot"),
+#                            self.tr("Auction not done yet"),
+#                            QtGui.QMessageBox.Ok)
         except _CanceledError:
-            QtGui.QMessageBox.warning(self.parent(),
-                            self.tr("Parse auction lot"),
-                            self.tr("Auction canceled"),
-                            QtGui.QMessageBox.Ok)
+            print("Auction canceled")
+#            QtGui.QMessageBox.warning(self.parent(),
+#                            self.tr("Parse auction lot"),
+#                            self.tr("Auction canceled"),
+#                            QtGui.QMessageBox.Ok)
 
     def readHtmlPage(self, url, encoding='utf-8'):
         # TODO: Remove debug output

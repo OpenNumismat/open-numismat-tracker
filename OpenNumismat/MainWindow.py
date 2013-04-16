@@ -1,4 +1,5 @@
 import sys
+import urllib
 
 from PyQt4 import QtGui, QtCore
 
@@ -14,6 +15,29 @@ from OpenNumismat.Tools.Gui import createIcon
 from OpenNumismat.Reports.Preview import PreviewDialog
 from OpenNumismat import version
 
+from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import AuctionSpbParser, AuctionSpbPageParser
+
+
+def loadFromUrl(url):
+    image = QtGui.QImage()
+    try:
+        # Wikipedia require any header
+        req = urllib.request.Request(url,
+                                headers={'User-Agent': "OpenNumismat"})
+        data = urllib.request.urlopen(req).read()
+        image.loadFromData(data)
+    except:
+        try:
+            # Wikipedia require any header
+            req = urllib.request.Request(url,
+                                    headers={'User-Agent': "OpenNumismat"})
+            data = urllib.request.urlopen(req).read()
+            image.loadFromData(data)
+        except:
+            print('Can not load image %s' % url)
+
+    return image
+
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -27,6 +51,9 @@ class MainWindow(QtGui.QMainWindow):
                                     self.tr("Settings..."), self)
         settingsAct.triggered.connect(self.settingsEvent)
 
+        importAct = QtGui.QAction(self.tr("Import"), self)
+        importAct.triggered.connect(self.importEvent)
+
         cancelFilteringAct = QtGui.QAction(createIcon('funnel.png'),
                                     self.tr("Clear all filters"), self)
         cancelFilteringAct.triggered.connect(self.cancelFilteringEvent)
@@ -38,6 +65,7 @@ class MainWindow(QtGui.QMainWindow):
 
         menubar = self.menuBar()
         file = menubar.addMenu(self.tr("&File"))
+        file.addAction(importAct)
         file.addAction(settingsAct)
         file.addSeparator()
         file.addAction(exitAct)
@@ -431,3 +459,73 @@ class MainWindow(QtGui.QMainWindow):
             return None
 
         return newVersion
+
+    def importEvent(self):
+        category = [
+            "Все категории",
+            "Монеты России до 1917 года (золото, серебро)",
+            "Монеты России до 1917 года (медь)",
+            "Монеты РСФСР, СССР, России",
+            "Допетровские монеты",
+            "Боны",
+            "Монеты антика, средневековье",
+            "Монеты иностранные",
+            "Награды, медали, знаки, жетоны, пряжки и т.д.",
+        ]
+
+        model = self.collection.model()
+
+        parser = AuctionSpbParser()
+        page_parser = AuctionSpbPageParser()
+        auct = 132
+        cat = 7
+        p = 0
+        while True:
+            params = urllib.parse.urlencode({'auctID': auct, 'catID': cat, 'order': 'numblot', 'p': p})
+            url = "http://auction.spb.ru/?%s" % params
+            p = p + 20
+            items = page_parser.parse(url)
+            print(len(items))
+            if not items:
+                break
+
+            for item in items:
+                if item['bids'] > 0:
+                    item1 = parser.parse(item['url'])
+#                    print(item)
+#                    print(item1)
+
+                    record_item = {
+                            'title': item1['title'],
+                            'denomination': item['denomination'],
+                            'country': None,
+                            'year': item['year'],
+                            'period': None,
+                            'mintmark': item['mintmark'],
+                            'category': category[cat],
+                            'status': 'pass',
+                            'material': item['material'],
+                            'grade': item['grade'],
+                            'place': 'АукционЪ.СПб',
+                            'price': item1['price'],
+                            'paid': item1['totalPayPrice'],
+                            'bailed': item1['totalSalePrice'],
+                            'buyer': item['buyer'],
+                            'url': item['url'],
+                            'bids': item['bids'],
+                            'bidders': item1['bidders'],
+                            'date': item1['date'],
+                    }
+                    imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
+                    for i, imageUrl in enumerate(item1['images']):
+                        if i < len(imageFields):
+                            record_item[imageFields[i]] = loadFromUrl(imageUrl)
+
+                    record = model.record()
+                    for field, value in record_item.items():
+                        record.setValue(field, value)
+                    model.appendRecordQuiet(record)
+                else:
+                    print(item, '- too little bids')
+
+            break
