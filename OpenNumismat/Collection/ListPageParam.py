@@ -56,7 +56,7 @@ class ListPageParam(QtCore.QObject):
             for field in self.fields.userFields:
                 enabled = False
                 # TODO: Customize default fields
-                if field.name in ['title', 'value', 'unit', 'country', 'year']:
+                if field.name in ['image', 'title', 'denomination', 'year', 'price', 'data']:
                     enabled = True
                 param = ColumnListParam(field.id, enabled)
                 self.columns.append(param)
