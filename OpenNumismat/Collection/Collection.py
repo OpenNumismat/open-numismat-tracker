@@ -112,7 +112,8 @@ class CollectionModel(QSqlTableModel):
         self.submitAll()
 
     def generateImagePath(self, img_id, create_folder=False):
-        path = '%s/%s_images/%s/%s' % (self.workingDir, self.collectionName, img_id[0:3], img_id[3:6])
+        path = '%s/%s_images/%s/%s' % (self.workingDir, self.collectionName,
+                                       img_id[0:2], img_id[2:4])
         if create_folder:
             os.makedirs(path, exist_ok=True)
         file_name = '%s/%s.jpg' % (path, img_id)
