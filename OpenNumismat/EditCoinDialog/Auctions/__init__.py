@@ -33,6 +33,36 @@ class _AuctionParser(QtCore.QObject):
 
         self.html = ''
 
+    def category(self, cat):
+        return []
+
+    def pages(self, auctNo, category):
+        raise NotImplementedError
+
+    def getPageUrl(self, auctNo, category, page):
+        raise NotImplementedError
+
+    def parsePage(self, url):
+        self.readHtmlPage(url, self._encoding())
+
+        if len(self.doc) == 0:
+            return
+
+        try:
+            return self._parsePage()
+        except _NotDoneYetError:
+            print("Auction not done yet")
+#            QtGui.QMessageBox.warning(self.parent(),
+#                            self.tr("Parse auction lot"),
+#                            self.tr("Auction not done yet"),
+#                            QtGui.QMessageBox.Ok)
+        except _CanceledError:
+            print("Auction canceled")
+#            QtGui.QMessageBox.warning(self.parent(),
+#                            self.tr("Parse auction lot"),
+#                            self.tr("Auction canceled"),
+#                            QtGui.QMessageBox.Ok)
+
 #    @waitCursorDecorator
     def parse(self, url):
         self.readHtmlPage(url, self._encoding())
@@ -73,6 +103,9 @@ class _AuctionParser(QtCore.QObject):
         return 'utf-8'
 
     def _parse(self):
+        raise NotImplementedError
+
+    def _parsePage(self):
         raise NotImplementedError
 
 

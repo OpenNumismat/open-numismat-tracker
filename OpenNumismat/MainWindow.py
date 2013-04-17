@@ -15,7 +15,7 @@ from OpenNumismat.Tools.Gui import createIcon
 from OpenNumismat.Reports.Preview import PreviewDialog
 from OpenNumismat import version
 
-from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import AuctionSpbParser, AuctionSpbPageParser
+from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import AuctionSpbParser
 
 
 def loadFromUrl(url):
@@ -461,39 +461,22 @@ class MainWindow(QtGui.QMainWindow):
         return newVersion
 
     def importEvent(self):
-        category = [
-            "Все категории",
-            "Монеты России до 1917 года (золото, серебро)",
-            "Монеты России до 1917 года (медь)",
-            "Монеты РСФСР, СССР, России",
-            "Допетровские монеты",
-            "Боны",
-            "Монеты антика, средневековье",
-            "Монеты иностранные",
-            "Награды, медали, знаки, жетоны, пряжки и т.д.",
-        ]
-
         model = self.collection.model()
 
         parser = AuctionSpbParser()
-        page_parser = AuctionSpbPageParser()
-        auct = 132
-        for auct_ in range(132):
-            auct = auct_ + 1
+        categories = [3, ]
+        for auct in range(133):
+            auctNo = auct + 1
 
-            cat = 3
-            p = 0
-            while True:
-                params = urllib.parse.urlencode({'auctID': auct, 'catID': cat, 'order': 'numblot', 'p': p})
-                url = "http://auction.spb.ru/?%s" % params
-                p = p + 20
-                items = page_parser.parse(url)
-                print(len(items))
-                if not items:
-                    break
+            for category in categories:
+                for page in parser.pages(auctNo, category):
+                    url = parser.getPageUrl(auctNo, category, page)
+                    items = parser.parsePage(url)
+                    print(len(items))
+                    if not items:
+                        break
 
-                for item in items:
-                    if item['bids'] > 0:
+                    for item in items:
                         item1 = parser.parse(item['url'])
     #                    print(item)
     #                    print(item1)
@@ -505,15 +488,15 @@ class MainWindow(QtGui.QMainWindow):
                                 'year': item['year'],
                                 'period': None,
                                 'mintmark': item['mintmark'],
-                                'category': category[cat],
+                                'category': parser.category(category),
                                 'status': 'pass',
                                 'material': item['material'],
                                 'grade': item['grade'],
                                 'auction': 'АукционЪ.СПб',
-                                'auctionnum': auct,
-                                'price': item1['price'],
-                                'paid': item1['totalPayPrice'],
-                                'bailed': item1['totalSalePrice'],
+                                'auctionnum': auctNo,
+                                'price': item['price'],
+                                'paid': item['totalPayPrice'],
+                                'bailed': item['totalSalePrice'],
                                 'buyer': item['buyer'],
                                 'url': item['url'],
                                 'bids': item['bids'],
@@ -529,7 +512,5 @@ class MainWindow(QtGui.QMainWindow):
                         for field, value in record_item.items():
                             record.setValue(field, value)
                         model.appendRecordQuiet(record)
-                    else:
-                        print(item, '- too little bids')
 
 #            break

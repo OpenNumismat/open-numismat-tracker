@@ -111,21 +111,46 @@ class MolotokParser(_AuctionParser):
         return str(price - commission)
 
 
-class AuctionSpbPageParser(_AuctionParser):
+class AuctionSpbParser(_AuctionParser):
     HostNames = ('www.auction.spb.ru', 'auction.spb.ru')
 
     @staticmethod
     def verifyDomain(url):
-        hostname = urllib.parse.urlparse(url).hostname
-        return (hostname in AuctionSpbPageParser.HostNames)
+        return (urllib.parse.urlparse(url).hostname in AuctionSpbParser.HostNames)
 
     def __init__(self, parent=None):
-        super(AuctionSpbPageParser, self).__init__(parent)
+        super(AuctionSpbParser, self).__init__(parent)
 
     def _encoding(self):
         return 'windows-1251'
 
-    def _parse(self):
+    def category(self, cat):
+        categories = [
+            "Все категории",
+            "Монеты России до 1917 года (золото, серебро)",
+            "Монеты России до 1917 года (медь)",
+            "Монеты РСФСР, СССР, России",
+            "Допетровские монеты",
+            "Боны",
+            "Монеты антика, средневековье",
+            "Монеты иностранные",
+            "Награды, медали, знаки, жетоны, пряжки и т.д.",
+        ]
+
+        return categories[cat]
+
+    def pages(self, auctNo, category):
+        page = 0
+        while 1:
+            yield page
+            page = page + 20
+
+    def getPageUrl(self, auctNo, category, page):
+        params = urllib.parse.urlencode({'auctID': auctNo, 'catID': category, 'order': 'numblot', 'p': page})
+        url = "http://auction.spb.ru/?%s" % params
+        return url
+
+    def _parsePage(self):
         items = []
         hostname = 'http://' + urllib.parse.urlparse(self.url).hostname
         table = self.html.cssselect('table tr')[4].cssselect('table td')[1].cssselect('table')[0]
@@ -142,27 +167,16 @@ class AuctionSpbPageParser(_AuctionParser):
                 buyer = str(tds[7].text_content())
                 bids = int(tds[8].text_content())
                 price = stringToMoney(tds[9].text_content())
+                totalPayPrice = self.totalPayPrice(price)
+                totalSalePrice = self.totalSalePrice(price)
                 items.append({
                         'url': url, 'denomination': denomination, 'year': year,
                         'mintmark': mintmark, 'material': material,
                         'grade': grade, 'buyer': buyer, 'bids': bids,
-                        'price': price})
+                        'price': price, 'totalPayPrice': totalPayPrice,
+                        'totalSalePrice': totalSalePrice})
 
         return items
-
-
-class AuctionSpbParser(_AuctionParser):
-    HostNames = ('www.auction.spb.ru', 'auction.spb.ru')
-
-    @staticmethod
-    def verifyDomain(url):
-        return (urllib.parse.urlparse(url).hostname in AuctionSpbParser.HostNames)
-
-    def __init__(self, parent=None):
-        super(AuctionSpbParser, self).__init__(parent)
-
-    def _encoding(self):
-        return 'windows-1251'
 
     def _parse(self):
         table = self.html.cssselect('table tr')[4].cssselect('table td')[0]
@@ -197,13 +211,12 @@ class AuctionSpbParser(_AuctionParser):
         if len(table.cssselect('table tr')) - 1 < 2:
             print("Only 1 bid")
 
-        content = table.cssselect('strong')[2].text_content()
-        item['price'] = stringToMoney(content)
+#        content = table.cssselect('strong')[2].text_content()
+#        item['price'] = stringToMoney(content)
 
-        price = float(item['price'])
-        item['totalPayPrice'] = str(price + price * 10 / 100)
-
-        item['totalSalePrice'] = self.totalSalePrice(price)
+#        price = float(item['price'])
+#        item['totalPayPrice'] = self.totalPayPrice(price)
+#        item['totalSalePrice'] = self.totalSalePrice(price)
 
         images = []
         content = table.cssselect('a')[0]
@@ -235,6 +248,9 @@ class AuctionSpbParser(_AuctionParser):
             totalPrice = 0
 
         return str(totalPrice)
+
+    def totalPayPrice(self, price):
+        return str(price + price * 10 / 100)
 
 
 class ConrosParser(_AuctionParser):
