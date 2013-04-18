@@ -95,6 +95,7 @@ class _AuctionParser(QtCore.QObject):
             self.html = lxml.html.fromstring(self.doc)
             self.url = url
         except (ValueError, urllib.error.URLError):
+            print("Error while reading page %s" % url)
             return False
 
         return True
