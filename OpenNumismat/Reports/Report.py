@@ -7,6 +7,10 @@ try:
     from jinja2 import Environment, FileSystemLoader
 except ImportError:
     print('jinja2 module missed. Report engine not available')
+try:
+    import numpy
+except ImportError:
+    print('numpy module missed. Trend functionality not available')
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
@@ -140,6 +144,10 @@ class Report(QtCore.QObject):
                             self.tr("Cancel"), len(records), self.parent())
 
             record_data = []
+            points = []
+            if records:
+                start_date = QtCore.QDate.fromString(records[0].value('date'), Qt.ISODate)
+
             for record in records:
                 progressDlg.step()
                 if progressDlg.wasCanceled():
@@ -151,8 +159,32 @@ class Report(QtCore.QObject):
                     self.mapping['record'] = recordMapping
                     self.__render('coin.htm', "coin_%d.htm" % record.value('id'))
 
-            self.mapping['records'] = record_data
+                days = QtCore.QDate.fromString(record.value('date'), Qt.ISODate).daysTo(start_date)
+                points.append((days, record.value('price')))
 
+            trend = []
+            if records:
+                progressDlg.setLabelText(self.tr("Generating trend"))
+
+                points.sort(key=lambda tup: tup[0], reverse=True)
+                coefficients = numpy.polyfit([tup[0] for tup in points], [tup[1] for tup in points], 3)
+                polynomial = numpy.poly1d(coefficients)
+                min_x = points[0][0]  # min(x)
+                max_x = points[-1][0]
+                xs = numpy.arange(min_x, max_x, (max_x - min_x) / 50)
+                ys = polynomial(xs)
+
+                for i in range(len(xs)):
+                    date = start_date.addDays(-xs[i])
+                    point = {'date_js': '%d,%d,%d' % (date.year(), date.month() - 1, date.day()),
+                         'date': date.toString(Qt.SystemLocaleShortDate),
+                         'price_raw': int(ys[i])}
+                    trend.append(point)
+
+            self.mapping['records'] = record_data
+            self.mapping['trend'] = trend
+
+            progressDlg.setLabelText(self.tr("Write report"))
             dstFile = self.__render('coins.htm', self.fileName)
 
             progressDlg.reset()
@@ -171,12 +203,13 @@ class Report(QtCore.QObject):
         return dstFile
 
     def __recordMapping(self, record):
-        imgFields = ['image', 'obverseimg', 'reverseimg',
-                     'photo1', 'photo2', 'photo3', 'photo4']
+        imgFields = ['photo1', 'photo2', 'photo3', 'photo4',
+                     'photo5', 'photo6', 'photo7', 'photo8']
 
         record_mapping = {}
-        record_mapping['status_raw'] = ''
-        record_mapping['issuedate_raw'] = ''
+        record_mapping['date_js'] = ''
+        record_mapping['date_raw'] = ''
+        record_mapping['price_raw'] = ''
         for field in self.model.fields:
             value = record.value(field.name)
             if value is None or value == '' or isinstance(value, QtCore.QPyNullVariant):
@@ -197,9 +230,11 @@ class Report(QtCore.QObject):
                     record_mapping[field.name] = imgFileTitle
                 else:
                     record_mapping[field.name] = formatFields(field, value)
-                    if field.name == 'status':
-                        record_mapping['status_raw'] = value
-                    elif field.name == 'issuedate':
-                        record_mapping['issuedate_raw'] = value
+                    if field.name == 'date':
+                        parts = value.split('-')
+                        record_mapping['date_js'] = '%d,%d,%d' % (int(parts[0]), int(parts[1]) - 1, int(parts[2]))
+                        record_mapping['date_raw'] = value
+                    if field.name == 'price':
+                        record_mapping['price_raw'] = value
 
         return record_mapping

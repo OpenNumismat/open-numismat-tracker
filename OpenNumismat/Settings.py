@@ -82,7 +82,7 @@ class Settings(BaseSettings):
                'error': False, 'updates': False,
                'free_numeric': False,
                'store_sorting': False,
-               'template': 'cbr',
+               'template': 'FCoins',
                'ImageSideLen': 1024}
 
     def __init__(self, autoSave=False):
