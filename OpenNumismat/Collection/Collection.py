@@ -310,7 +310,10 @@ class CollectionModel(QSqlTableModel):
 
     def getImage(self, img_id):
         file_name = self.generateImagePath(img_id)
-        file = open(file_name, "rb")
+        try:
+            file = open(file_name, "rb")
+        except FileNotFoundError:
+            return None
         ba = QtCore.QByteArray(file.read())
         file.close()
         return ba
