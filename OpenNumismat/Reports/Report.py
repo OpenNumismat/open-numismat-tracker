@@ -171,7 +171,7 @@ class Report(QtCore.QObject):
                 polynomial = numpy.poly1d(coefficients)
                 min_x = points[0][0]  # min(x)
                 max_x = points[-1][0]
-                xs = numpy.arange(min_x, max_x, (max_x - min_x) / 50)
+                xs = numpy.arange(min_x, max_x, (max_x - min_x) / 100)
                 ys = polynomial(xs)
 
                 for i in range(len(xs)):

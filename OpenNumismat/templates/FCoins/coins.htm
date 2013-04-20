@@ -95,12 +95,15 @@ valueAxis.dashLength = 1;
 chart.addValueAxis(valueAxis);
 var graph1 = new AmCharts.AmGraph();
 graph1.title = "Цена";
+graph1.bullet = "round";
+graph1.bulletAlpha=0;
 graph1.balloonText = "[[datcategory]]\nЦена: [[value]] руб.";
 graph1.lineAlpha = 1;
 graph1.type="smoothedLine";
 graph1.legendValueText=" ";
 chart.addGraph(graph1);
 CreateAukGraphs('Proof');
+/*
 chartCursor = new AmCharts.ChartCursor();
 chartCursor.cursorAlpha = 0;
 chartCursor.cursorPosition = "mouse";
@@ -108,6 +111,7 @@ chartCursor.oneBalloonOnly=true;
 chartCursor.bulletsEnabled=true;
 chartCursor.categoryBalloonEnabled=false;
 chart.addChartCursor(chartCursor);
+*/
 var chartScrollbar = new AmCharts.ChartScrollbar();
 chartScrollbar.graph = graph1;
 chartScrollbar.scrollbarHeight = 40;
