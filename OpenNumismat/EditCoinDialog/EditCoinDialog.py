@@ -121,15 +121,6 @@ class EditCoinDialog(QtGui.QDialog):
                 value = value.strip()
             self.record.setValue(item.field(), value)
 
-        if not self.usedFields:
-            if self.model.isExist(self.record):
-                result = QtGui.QMessageBox.warning(self, self.tr("Save"),
-                            self.tr("Similar coin already exists. Save?"),
-                            QtGui.QMessageBox.Save | QtGui.QMessageBox.No,
-                            QtGui.QMessageBox.No)
-                if result != QtGui.QMessageBox.Save:
-                    return
-
         self.accept()
 
     def getUsedFields(self):

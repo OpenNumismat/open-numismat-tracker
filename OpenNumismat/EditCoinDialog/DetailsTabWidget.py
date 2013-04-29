@@ -188,7 +188,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
         layout.addRow(self.items['saller'])
         layout.addRow(self.items['buyer'])
         layout.addRow(self.items['bids'], self.items['bidders'])
-        layout.addRow(self.items['auction'], self.items['auctionnum'])
+#        layout.addRow(self.items['auction'], self.items['auctionnum'])
         layout.addRow(self.items['url'])
 
         layout.addRow(self.items['info'])
@@ -221,8 +221,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
         title = QApplication.translate('DetailsTabWidget', "Catalogue")
         layout = BaseFormGroupBox(title, parent)
 
-        layout.addRow(self.items['catalognum1'], self.items['catalognum2'])
-        layout.addRow(self.items['catalognum3'])
+        layout.addRow(self.items['catalognum'])
 
         return layout
 
@@ -276,16 +275,11 @@ class FormDetailsTabWidget(DetailsTabWidget):
         self.createCoinPage()
         self.createTrafficPage()
         self.createParametersPage()
-        self.createImagePage1()
-        self.createImagePage2()
+        self.createImagePage()
 
-    def createImagePage1(self):
-        images = self.images1Layout()
-        self.addTabPage(self.tr("Images 1"), [images, ])
-
-    def createImagePage2(self):
-        images = self.images2Layout()
-        self.addTabPage(self.tr("Images 2"), [images, ])
+    def createImagePage(self):
+        images = self.imagesLayout()
+        self.addTabPage(self.tr("Images"), [images, ])
 
     def addItem(self, field):
         checkable = 0
@@ -331,16 +325,10 @@ class FormDetailsTabWidget(DetailsTabWidget):
 
         return layout
 
-    def images1Layout(self, parent=None):
+    def imagesLayout(self, parent=None):
         layout = ImageFormLayout(parent)
         layout.addImages([self.items['photo1'], self.items['photo2'],
                           self.items['photo3'], self.items['photo4']])
-        return layout
-
-    def images2Layout(self, parent=None):
-        layout = ImageFormLayout(parent)
-        layout.addImages([self.items['photo5'], self.items['photo6'],
-                          self.items['photo7'], self.items['photo8']])
         return layout
 
     def _createTrafficParts(self, index=0):

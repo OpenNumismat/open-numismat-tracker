@@ -2,7 +2,7 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
 from OpenNumismat.EditCoinDialog.FormItems import *
-from OpenNumismat.EditCoinDialog.ImageLabel import ImageEdit, EdgeImageEdit
+from OpenNumismat.EditCoinDialog.ImageLabel import ImageEdit
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
 from OpenNumismat.Settings import Settings
 
@@ -57,12 +57,10 @@ class FormItem(object):
                 self._widget = MoneyEdit(parent)
         elif self._type == Type.Text:
             self._widget = TextEdit(parent)
+        elif self._type == Type.Photo:
+            self._widget = ImageEdit(field, parent)
         elif self._type == Type.Image:
             self._widget = ImageEdit(field, parent)
-        elif self._type == Type.PreviewImage:
-            self._widget = ImageEdit(field, parent)
-        elif self._type == Type.EdgeImage:
-            self._widget = EdgeImageEdit(field, parent)
         elif self._type == Type.Date:
             self._widget = DateEdit(parent)
         elif self._type == Type.DateTime:

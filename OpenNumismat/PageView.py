@@ -37,7 +37,7 @@ class ImageView(QtGui.QWidget):
 
         self.imageFields = []
         for field in self.model.fields.userFields:
-            if field.type in [Type.Image, Type.EdgeImage]:
+            if field.type == Type.Photo:
                 self.imageFields.append(field)
 
         # By default show only first 2 images
@@ -76,25 +76,21 @@ class ImageView(QtGui.QWidget):
         self.currentIndex = current
         self.clear()
 
-        images = []
-        for i, field in enumerate(self.imageFields):
+        for i, file in enumerate(self.model.getPhotoFiles(current.row())):
             self.imageButtons[i].stateChanged.disconnect(self.buttonClicked)
             self.imageButtons[i].setCheckState(Qt.Unchecked)
             self.imageButtons[i].setDisabled(True)
 
-            index = self.model.index(current.row(), field.id)
-            if index.data() and not index.data().isNull():
-                if len(images) < self.showedCount:
-                    images.append(index.data())
-                    self.imageButtons[i].setCheckState(Qt.Checked)
-                self.imageButtons[i].setDisabled(False)
+            if i < self.showedCount:
+                self.imageButtons[i].setCheckState(Qt.Checked)
+
+                image = ImageLabel(self)
+                image.loadFromFile(self.model.generatePhotoPath(file))
+                self.imageLayout.addWidget(image)
+
+            self.imageButtons[i].setDisabled(False)
 
             self.imageButtons[i].stateChanged.connect(self.buttonClicked)
-
-        for imageData in images:
-            image = ImageLabel(self)
-            image.loadFromData(imageData)
-            self.imageLayout.addWidget(image)
 
     def __layoutToWidget(self, layout):
         widget = QtGui.QWidget(self)

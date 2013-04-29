@@ -52,6 +52,14 @@ class ImageLabel(QtGui.QLabel):
 
         return result
 
+    def loadFromFile(self, fileName):
+        image = QtGui.QImage()
+        result = image.load(fileName)
+        if result:
+            self._setImage(image)
+
+        return result
+
     def _setImage(self, image):
         self.image = image
         self._showImage()
@@ -232,17 +240,3 @@ class ImageEdit(ImageLabel):
 
         self._setImage(fixedImage)
         self.changed = True
-
-
-class EdgeImageEdit(ImageEdit):
-    def __init__(self, name, parent=None):
-        super(EdgeImageEdit, self).__init__(name, parent)
-
-    def _setImage(self, image):
-        if not image.isNull():
-            if image.width() < image.height():
-                matrix = QtGui.QMatrix()
-                matrix.rotate(90)
-                image = image.transformed(matrix, Qt.SmoothTransformation)
-
-        super(EdgeImageEdit, self)._setImage(image)

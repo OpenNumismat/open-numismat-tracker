@@ -11,47 +11,17 @@ class FieldTypes():
     Money = 5
     Date = 6
     BigInt = 7
-    Image = 8
+    Photo = 8
     Value = 9
     Status = 10
     DateTime = 11
-    EdgeImage = 12
-    PreviewImage = 13
+    Image = 12
 
     Mask = 0xFF
     Checkable = 0x100
     Disabled = 0x200
 
-    ImageTypes = (Image, EdgeImage, PreviewImage)
-
-    @staticmethod
-    def toSql(type_):
-        if type_ == FieldTypes.String:
-            sql_type = 'TEXT'
-        elif type_ == FieldTypes.ShortString:
-            sql_type = 'TEXT'
-        elif type_ == FieldTypes.Number:
-            sql_type = 'INTEGER'
-        elif type_ == FieldTypes.Text:
-            sql_type = 'TEXT'
-        elif type_ == FieldTypes.Money:
-            sql_type = 'NUMERIC'
-        elif type_ == FieldTypes.Date:
-            sql_type = 'TEXT'
-        elif type_ == FieldTypes.BigInt:
-            sql_type = 'INTEGER'
-        elif type_ == FieldTypes.PreviewImage:
-            sql_type = 'BLOB'
-        elif type_ == FieldTypes.Image:
-            sql_type = 'TEXT'
-        elif type_ == FieldTypes.Value:
-            sql_type = 'NUMERIC'
-        elif type_ == FieldTypes.DateTime:
-            sql_type = 'TEXT'
-        else:
-            raise
-
-        return sql_type
+    ImageTypes = (Image, Photo)
 
 
 class CollectionField():
@@ -83,9 +53,7 @@ class CollectionFieldsBase(QObject):
                 ('fineness', self.tr("Fineness"), Type.Value),
                 ('weight', self.tr("Weight"), Type.Value),
                 ('grade', self.tr("Grade"), Type.String),
-                ('catalognum1', self.tr("1#"), Type.String),
-                ('catalognum2', self.tr("2#"), Type.String),
-                ('catalognum3', self.tr("3#"), Type.String),
+                ('catalognum', self.tr("1#"), Type.String),
                 ('rarity', self.tr("Rarity"), Type.String),
                 ('variety', self.tr("Variety"), Type.String),
                 ('paid', self.tr("Paid"), Type.Money),
@@ -97,17 +65,13 @@ class CollectionFieldsBase(QObject):
                 ('bids', self.tr("Bids"), Type.String),
                 ('bidders', self.tr("Bidders"), Type.String),
                 ('auction', self.tr("Auction"), Type.String),
-                ('auctionnum', self.tr("Auction #"), Type.BigInt),
+                ('lotnum', self.tr("Lot #"), Type.BigInt),
                 ('info', self.tr("Info"), Type.Text),
-                ('image', self.tr("Image"), Type.PreviewImage),
-                ('photo1', self.tr("Photo 1"), Type.Image),
-                ('photo2', self.tr("Photo 2"), Type.Image),
-                ('photo3', self.tr("Photo 3"), Type.Image),
-                ('photo4', self.tr("Photo 4"), Type.Image),
-                ('photo5', self.tr("Photo 5"), Type.Image),
-                ('photo6', self.tr("Photo 6"), Type.Image),
-                ('photo7', self.tr("Photo 7"), Type.Image),
-                ('photo8', self.tr("Photo 8"), Type.Image),
+                ('image', self.tr("Image"), Type.Image),
+                ('photo1', self.tr("Photo 1"), Type.Photo),
+                ('photo2', self.tr("Photo 2"), Type.Photo),
+                ('photo3', self.tr("Photo 3"), Type.Photo),
+                ('photo4', self.tr("Photo 4"), Type.Photo),
                 ('quantity', self.tr("Quantity"), Type.BigInt),
                 ('url', self.tr("URL"), Type.String),
                 ('createdat', self.tr("Created at"), Type.DateTime),

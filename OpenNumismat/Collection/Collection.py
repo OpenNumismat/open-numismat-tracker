@@ -65,8 +65,20 @@ class CollectionModel(QSqlTableModel):
                 elif field.type == Type.Date:
                     date = QtCore.QDate.fromString(data, Qt.ISODate)
                     text = date.toString(Qt.SystemLocaleShortDate)
+                elif field.type == Type.Photo:
+                    raise NotImplementedError
+                    if data:
+                        idIndex = self.fieldIndex('id')
+                        index_id = self.index(index.row(), idIndex)
+                        # TODO: Get via super(CollectionModel, self).data(index, Qt.DisplayRole)
+                        id_ = index_id.data()
+                        if id_:
+                            print(id_, index.column(), field.name)
+                        return self.getPhoto(data)
+                    else:
+                        return None
                 elif field.type == Type.Image:
-                    if not isinstance(data, QtCore.QPyNullVariant):
+                    if data:
                         return self.getImage(data)
                     else:
                         return None
@@ -111,12 +123,12 @@ class CollectionModel(QSqlTableModel):
         self.insertRecord(-1, record)
         self.submitAll()
 
-    def generateImagePath(self, img_id, create_folder=False):
-        path = '%s/%s_images/%s/%s' % (self.workingDir, self.collectionName,
-                                       img_id[0:2], img_id[2:4])
+    def generatePhotoPath(self, file_title, create_folder=False):
+        path = os.path.join(self.workingDir, '%s_images' % self.collectionName,
+                            file_title[0:2], file_title[2:4])
         if create_folder:
             os.makedirs(path, exist_ok=True)
-        file_name = '%s/%s.jpg' % (path, img_id)
+        file_name = os.path.join(path, file_title)
 
         return file_name
 
@@ -125,47 +137,107 @@ class CollectionModel(QSqlTableModel):
         record.setNull('id')  # remove ID value from record
         record.setValue('createdat', record.value('updatedat'))
 
-        for field in ['photo1', 'photo2', 'photo3', 'photo4',
-                      'photo5', 'photo6', 'photo7', 'photo8']:
+        if not record.isNull('image'):
+            query = QSqlQuery(self.database())
+            query.prepare("INSERT INTO images (image) VALUES (?)")
+            query.addBindValue(record.value('image'))
+            query.exec_()
+
+            img_id = query.lastInsertId()
+            record.setValue('image_id', img_id)
+        else:
+            record.setNull('image_id')
+
+        # TODO: Check result
+        res = super(CollectionModel, self).insertRecord(row, record)
+        self.submitAll()
+        coin_id = self.query().lastInsertId()
+
+        for i in range(4):
+            field = "photo%d" % (i + 1)
             if not record.isNull(field):
-                img_id = str(uuid.uuid1())
-                file_name = self.generateImagePath(img_id, True)
+                file_title = str(uuid.uuid1()) + '.jpg'
+                file_name = self.generatePhotoPath(file_title, True)
                 file = open(file_name, "wb")
                 file.write(record.value(field))
                 file.close()
-            else:
-                img_id = None
 
-            record.setValue(field, img_id)
+                query = QSqlQuery(self.database())
+                query.prepare("""INSERT INTO photos (file, position, coin_id)
+                                 VALUES (?, ?, ?)""")
+                query.addBindValue(file_title)
+                query.addBindValue(i)
+                query.addBindValue(coin_id)
+                query.exec_()
 
-        return super(CollectionModel, self).insertRecord(row, record)
+        return res
 
     def setRecord(self, row, record):
         self._updateRecord(record)
-        for field in ['photo1', 'photo2', 'photo3', 'photo4',
-                      'photo5', 'photo6', 'photo7', 'photo8']:
-            img_id = record.value(field + '_id')
-            if record.isNull(field):
-                if not record.isNull(field + '_id'):
-                    file_name = self.generateImagePath(img_id)
-                    os.remove(file_name)
 
-                    img_id = None
+        img_id = record.value('image_id')
+        if not record.isNull('image'):
+            if record.isNull('image_id'):
+                query = QSqlQuery(self.database())
+                query.prepare("INSERT INTO images (image) VALUES (?)")
+                query.addBindValue(record.value('image'))
+                query.exec_()
+
+                img_id = query.lastInsertId()
             else:
+                query = QSqlQuery(self.database())
+                query.prepare("UPDATE images SET image=? WHERE id=?")
+                query.addBindValue(record.value('image'))
+                query.addBindValue(img_id)
+                query.exec_()
+
+            record.setValue('image_id', img_id)
+        else:
+            if not record.isNull('image_id'):
+                query = QSqlQuery(self.database())
+                query.prepare("DELETE FROM images WHERE id=?")
+                query.addBindValue(img_id)
+                query.exec_()
+
+            record.setNull('image_id')
+
+        coin_id = record.value('id')
+
+        for i in range(4):
+            field = "photo%d" % (i + 1)
+            if not record.isNull(field):
                 if record.isNull(field + '_id'):
-                    img_id = str(uuid.uuid1())
-                    file_name = self.generateImagePath(img_id, True)
-                    file = open(file_name, "wb")
-                    file.write(record.value(field))
-                    file.close()
-                else:
-                    file_name = self.generateImagePath(img_id)
-                    os.remove(file_name)
+                    file_title = str(uuid.uuid1()) + '.jpg'
+                    file_name = self.generatePhotoPath(file_title, True)
                     file = open(file_name, "wb")
                     file.write(record.value(field))
                     file.close()
 
-            record.setValue(field, img_id)
+                    query = QSqlQuery(self.database())
+                    query.prepare("""INSERT INTO photos (file, position, coin_id)
+                                     VALUES (?, ?, ?)""")
+                    query.addBindValue(file_title)
+                    query.addBindValue(i)
+                    query.addBindValue(coin_id)
+                    query.exec_()
+                else:
+                    file_title = record.value(field + '_file')
+                    file_name = self.generatePhotoPath(file_title)
+#                    os.remove(file_name)
+                    file = open(file_name, "wb")
+                    file.write(record.value(field))
+                    file.close()
+            else:
+                if not record.isNull(field + '_id'):
+                    file_title = record.value(field + '_file')
+                    file_name = self.generatePhotoPath(file_title)
+                    os.remove(file_name)
+
+                    query = QSqlQuery(self.database())
+                    query.prepare("DELETE FROM photos WHERE id=?")
+                    query.addBindValue(record.value(field + '_id'))
+                    query.exec_()
+
         return super(CollectionModel, self).setRecord(row, record)
 
     def record(self, row= -1):
@@ -174,27 +246,69 @@ class CollectionModel(QSqlTableModel):
         else:
             record = super(CollectionModel, self).record()
 
-        for field in ['photo1', 'photo2', 'photo3', 'photo4',
-                      'photo5', 'photo6', 'photo7', 'photo8']:
+        record.append(QSqlField('image'))
+        if not record.isNull('image'):
+            img_id = record.value('image_id')
+            data = self.getImage(img_id)
+            record.setValue('image', data)
+
+        for i in range(4):
+            field = "photo%d" % (i + 1)
+            record.append(QSqlField(field))
             record.append(QSqlField(field + '_id'))
-            if not record.isNull(field):
-                img_id = record.value(field)
-                data = self.getImage(img_id)
-                record.setValue(field, data)
-                record.setValue(field + '_id', img_id)
-            else:
-                record.setValue(field, None)
+            record.append(QSqlField(field + '_file'))
+
+            if not record.isNull('id'):
+                query = QSqlQuery(self.database())
+                query.prepare("SELECT id, file FROM photos WHERE " \
+                              "coin_id=? AND position=?")
+                query.addBindValue(record.value('id'))
+                query.addBindValue(i)
+                query.exec_()
+                if query.first():
+                    img_id = query.record().value('id')
+                    record.setValue(field + '_id', img_id)
+
+                    file = query.record().value('file')
+                    record.setValue(field + '_file', file)
+
+                    file_title = query.record().value('file')
+                    data = self.getPhoto(file_title)
+                    record.setValue(field, data)
 
         return record
 
+    def getPhotoFiles(self, row):
+        record = self.record(row)
+        if not record.isNull('id'):
+            query = QSqlQuery(self.database())
+            query.prepare("SELECT file FROM photos WHERE " \
+                          "coin_id=? ORDER BY position")
+            query.addBindValue(record.value('id'))
+            query.exec_()
+            while query.next():
+                file_title = query.record().value('file')
+                yield file_title
+
     def removeRow(self, row):
+        for file_title in self.getPhotoFiles(row):
+            file_name = self.generatePhotoPath(file_title)
+            os.remove(file_name)
+
         record = super(CollectionModel, self).record(row)
-        for field in ['photo1', 'photo2', 'photo3', 'photo4',
-                      'photo5', 'photo6', 'photo7', 'photo8']:
-            if not record.isNull(field):
-                img_id = record.value(field)
-                file_name = self.generateImagePath(img_id)
-                os.remove(file_name)
+
+        # Cascading delete isn't supported until Sqlite version 3.6.19
+        # Version since Qt 4.8.0 is 3.7.7.1
+        query = QSqlQuery(self.database())
+        query.prepare("DELETE FROM photos WHERE coin_id=?")
+        query.addBindValue(record.value('id'))
+        query.exec_()
+
+        if not record.isNull('image_id'):
+            query = QSqlQuery(self.database())
+            query.prepare("DELETE FROM images WHERE id=?")
+            query.addBindValue(record.value('image_id'))
+            query.exec_()
 
         return super(CollectionModel, self).removeRow(row)
 
@@ -205,14 +319,10 @@ class CollectionModel(QSqlTableModel):
         obverseImage = QtGui.QImage()
         reverseImage = QtGui.QImage()
         for field in self.fields.userFields:
-            if field.type == Type.Image:
+            if field.type == Type.Photo:
                 # Convert image to DB format
                 data = record.value(field.name)
-                if isinstance(data, str):
-                    # Copying record as text (from Excel) store missed images
-                    # as string
-                    record.setNull(field.name)
-                elif isinstance(data, QtGui.QImage):
+                if isinstance(data, QtGui.QImage):
                     ba = QtCore.QByteArray()
                     buffer = QtCore.QBuffer(ba)
                     buffer.open(QtCore.QIODevice.WriteOnly)
@@ -309,7 +419,15 @@ class CollectionModel(QSqlTableModel):
         self.__applyFilter()
 
     def getImage(self, img_id):
-        file_name = self.generateImagePath(img_id)
+        query = QSqlQuery(self.database())
+        query.prepare("SELECT image FROM images WHERE id=?")
+        query.addBindValue(img_id)
+        query.exec_()
+        if query.first():
+            return query.record().value(0)
+
+    def getPhoto(self, file_title):
+        file_name = self.generatePhotoPath(file_title)
         try:
             file = open(file_name, "rb")
         except FileNotFoundError:
@@ -324,28 +442,6 @@ class CollectionModel(QSqlTableModel):
         else:
             combinedFilter = self.intFilter + self.extFilter
         super(CollectionModel, self).setFilter(combinedFilter)
-
-    def isExist(self, record):
-        fields = ['denomination', 'country', 'period', 'year', 'grade',
-                  'mintmark', 'category', 'subject',
-                  'material', 'quality', 'date', 'price',
-                  'saller', 'auction', 'auctionnum', 'buyer', 'variety']
-        filterParts = [field + '=?' for field in fields]
-        sqlFilter = ' AND '.join(filterParts)
-
-        db = self.database()
-        query = QSqlQuery(db)
-        query.prepare("SELECT count(*) FROM coins WHERE id<>? AND " + sqlFilter)
-        query.addBindValue(record.value('id'))
-        for field in fields:
-            query.addBindValue(record.value(field))
-        query.exec_()
-        if query.first():
-            count = query.record().value(0)
-            if count > 0:
-                return True
-
-        return False
 
 
 class CollectionSettings(BaseSettings):
@@ -482,15 +578,68 @@ class Collection(QtCore.QObject):
         return True
 
     def createCoinsTable(self):
-        sqlFields = []
-        for field in self.fields:
-            if field.name == 'id':
-                sqlFields.append('id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT')
-            else:
-                sqlFields.append("%s %s" % (field.name, Type.toSql(field.type)))
+        self.db.transaction()
 
-        sql = "CREATE TABLE coins (" + ", ".join(sqlFields) + ")"
+        sql = """CREATE TABLE coins (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                title TEXT, denomination TEXT, country TEXT, period TEXT,
+                year INTEGER, mintmark TEXT, category TEXT, subject TEXT,
+                material TEXT, diameter NUMERIC, fineness NUMERIC,
+                weight NUMERIC, grade TEXT, catalognum TEXT, rarity TEXT,
+                variety TEXT, paid NUMERIC, saller TEXT, date TEXT,
+                price NUMERIC, bailed NUMERIC, buyer TEXT, bids TEXT,
+                bidders TEXT, auction_id INTEGER, lotnum INTEGER, info TEXT,
+                image_id INTEGER, quantity INTEGER, url TEXT, createdat TEXT,
+                updatedat TEXT)"""
         QSqlQuery(sql, self.db)
+
+        sql = """CREATE INDEX coins_denomination ON coins (denomination)"""
+        QSqlQuery(sql, self.db)
+
+        sql = """CREATE TABLE images (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                image BLOB)"""
+        QSqlQuery(sql, self.db)
+
+        sql = """CREATE TABLE photos (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                file TEXT,
+                url TEXT,
+                position INTEGER,
+                coin_id INTEGER REFERENCES coins(id) ON DELETE CASCADE)"""
+        QSqlQuery(sql, self.db)
+
+        sql = """PRAGMA foreign_keys = ON"""
+        QSqlQuery(sql, self.db)
+
+        sql = """CREATE INDEX photos_coin_id ON photos (coin_id)"""
+        QSqlQuery(sql, self.db)
+
+        sql = """CREATE TABLE auctions (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                url TEXT,
+                date TEXT,
+                number INTEGER,
+                site_id INTEGER,
+                category_id INTEGER)"""
+        QSqlQuery(sql, self.db)
+
+        sql = """CREATE TABLE site (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                url TEXT,
+                icon BLOB,
+                firm TEXT)"""
+        QSqlQuery(sql, self.db)
+
+        sql = """CREATE TABLE category (
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                site_id INTEGER)"""
+        QSqlQuery(sql, self.db)
+
+        if not self.db.commit():
+            self.db.rollback()
 
     def getFileName(self):
         return QtCore.QDir(self.fileName).absolutePath()
