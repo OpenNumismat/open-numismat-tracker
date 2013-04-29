@@ -15,6 +15,8 @@ class ImageView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(ImageView, self).__init__(parent)
 
+        self.photos = []
+
         self.currentIndex = None
 
         layout = QtGui.QVBoxLayout(self)
@@ -61,13 +63,12 @@ class ImageView(QtGui.QWidget):
     def buttonClicked(self, state):
         self.clear()
 
-        current = self.currentIndex
         self.showedCount = 0
-        for i, field in enumerate(self.imageFields):
-            if self.imageButtons[i].checkState() == Qt.Checked:
+        for i, btn in enumerate(self.imageButtons):
+            if btn.checkState() == Qt.Checked:
+                file_title = self.photos[i]
                 image = ImageLabel(self)
-                index = self.model.index(current.row(), field.id)
-                image.loadFromData(index.data())
+                image.loadFromFile(self.model.generatePhotoPath(file_title))
                 self.imageLayout.addWidget(image)
 
                 self.showedCount = self.showedCount + 1
@@ -76,10 +77,17 @@ class ImageView(QtGui.QWidget):
         self.currentIndex = current
         self.clear()
 
+        for btn in self.imageButtons:
+            btn.stateChanged.disconnect(self.buttonClicked)
+            btn.setCheckState(Qt.Unchecked)
+            btn.setDisabled(True)
+            btn.stateChanged.connect(self.buttonClicked)
+
+        self.photos = []
         for i, file in enumerate(self.model.getPhotoFiles(current.row())):
             self.imageButtons[i].stateChanged.disconnect(self.buttonClicked)
-            self.imageButtons[i].setCheckState(Qt.Unchecked)
-            self.imageButtons[i].setDisabled(True)
+
+            self.photos.append(file)
 
             if i < self.showedCount:
                 self.imageButtons[i].setCheckState(Qt.Checked)
@@ -88,7 +96,7 @@ class ImageView(QtGui.QWidget):
                 image.loadFromFile(self.model.generatePhotoPath(file))
                 self.imageLayout.addWidget(image)
 
-            self.imageButtons[i].setDisabled(False)
+            self.imageButtons[i].setEnabled(True)
 
             self.imageButtons[i].stateChanged.connect(self.buttonClicked)
 
