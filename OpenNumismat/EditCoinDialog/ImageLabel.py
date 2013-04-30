@@ -18,14 +18,19 @@ class ImageLabel(QtGui.QLabel):
         self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.setFocusPolicy(Qt.StrongFocus)
 
-    def mouseDoubleClickEvent(self, e):
-        tmpDir = QtCore.QDir(TemporaryDir.path())
-        file = QtCore.QTemporaryFile(tmpDir.absoluteFilePath("img_XXXXXX.jpg"))
-        file.setAutoRemove(False)
-        file.open()
+        self.srcFile = None
 
-        fileName = QtCore.QFileInfo(file).absoluteFilePath()
-        self.image.save(fileName)
+    def mouseDoubleClickEvent(self, e):
+        if self.srcFile:
+            fileName = self.srcFile
+        else:
+            tmpDir = QtCore.QDir(TemporaryDir.path())
+            file = QtCore.QTemporaryFile(tmpDir.absoluteFilePath("img_XXXXXX.jpg"))
+            file.setAutoRemove(False)
+            file.open()
+
+            fileName = QtCore.QFileInfo(file).absoluteFilePath()
+            self.image.save(fileName)
 
         executor = QtGui.QDesktopServices()
         executor.openUrl(QtCore.QUrl.fromLocalFile(fileName))
@@ -50,6 +55,7 @@ class ImageLabel(QtGui.QLabel):
         result = image.loadFromData(data)
         if result:
             self._setImage(image)
+            self.srcFile = None
 
         return result
 
@@ -58,6 +64,7 @@ class ImageLabel(QtGui.QLabel):
         result = image.load(fileName)
         if result:
             self._setImage(image)
+            self.srcFile = fileName
 
         return result
 
