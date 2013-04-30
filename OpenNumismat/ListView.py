@@ -83,6 +83,8 @@ class SortFilterProxyModel(QtGui.QSortFilterProxyModel):
         elif isinstance(rightData, str):
             leftData = str(leftData)
 
+        return leftData < rightData
+
 
 class ListView(QtGui.QTableView):
     rowChanged = pyqtSignal(object)
