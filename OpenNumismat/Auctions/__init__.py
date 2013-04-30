@@ -110,10 +110,10 @@ class _AuctionParser(QtCore.QObject):
         raise NotImplementedError
 
 
-from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import MolotokParser
-from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import AuctionSpbParser
-from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import ConrosParser
-from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import WolmarParser
+from OpenNumismat.Auctions.AuctionParser import MolotokParser
+from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
+from OpenNumismat.Auctions.AuctionParser import ConrosParser
+from OpenNumismat.Auctions.AuctionParser import WolmarParser
 
 
 def getParser(url, parent=None):

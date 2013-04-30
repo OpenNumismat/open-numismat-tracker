@@ -15,7 +15,7 @@ from OpenNumismat.Tools.Gui import createIcon
 from OpenNumismat.Reports.Preview import PreviewDialog
 from OpenNumismat import version
 
-from OpenNumismat.EditCoinDialog.Auctions.AuctionParser import AuctionSpbParser
+from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
 
 
 def loadFromUrl(url):

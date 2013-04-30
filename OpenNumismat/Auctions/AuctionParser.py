@@ -4,8 +4,8 @@ import urllib.parse
 
 from PyQt4 import QtGui, QtCore
 
-from OpenNumismat.EditCoinDialog.Auctions import AuctionItem
-from OpenNumismat.EditCoinDialog.Auctions import _AuctionParser, _NotDoneYetError, _CanceledError
+from OpenNumismat.Auctions import AuctionItem
+from OpenNumismat.Auctions import _AuctionParser, _NotDoneYetError, _CanceledError
 from OpenNumismat.Tools.Converters import stringToMoney
 
 
