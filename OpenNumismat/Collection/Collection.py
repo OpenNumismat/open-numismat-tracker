@@ -624,7 +624,7 @@ class Collection(QtCore.QObject):
                 category_id INTEGER)"""
         QSqlQuery(sql, self.db)
 
-        sql = """CREATE TABLE site (
+        sql = """CREATE TABLE sites (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
                 url TEXT,
@@ -632,7 +632,7 @@ class Collection(QtCore.QObject):
                 firm TEXT)"""
         QSqlQuery(sql, self.db)
 
-        sql = """CREATE TABLE category (
+        sql = """CREATE TABLE categories (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
                 site_id INTEGER)"""
