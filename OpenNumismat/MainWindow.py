@@ -461,6 +461,8 @@ class MainWindow(QtGui.QMainWindow):
         return newVersion
 
     def importEvent(self):
+        from PyQt4 import QtSql
+
         model = self.collection.model()
 
         parser = AuctionSpbParser()
@@ -469,6 +471,26 @@ class MainWindow(QtGui.QMainWindow):
             auctNo = auct + 1
 
             for category in categories:
+                url = parser.getPageUrl(auctNo, category, 0)
+                items = parser.parsePage(url)
+                if not items:
+                    continue
+
+                item1 = parser.parse(items[0]['url'])
+
+                query = QtSql.QSqlQuery(self.collection.db)
+                query.prepare("INSERT INTO auctions (url, number, date, site_id, category_id)" \
+                              " VALUES (?, ?, ?, ?, ?)")
+                query.addBindValue(url)
+                query.addBindValue(auctNo)
+                query.addBindValue(item1['date'])
+                query.addBindValue(1)
+                query.addBindValue(category)
+
+                query.exec_()
+
+                auct_id = query.lastInsertId()
+
                 for page in parser.pages(auctNo, category):
                     url = parser.getPageUrl(auctNo, category, page)
                     items = parser.parsePage(url)
@@ -492,8 +514,7 @@ class MainWindow(QtGui.QMainWindow):
                                 'status': 'pass',
                                 'material': item['material'],
                                 'grade': item['grade'],
-                                'auction': 'АукционЪ.СПб',
-                                'auctionnum': auctNo,
+                                'auction_id': auct_id,
                                 'price': item['price'],
                                 'paid': item['totalPayPrice'],
                                 'bailed': item['totalSalePrice'],
@@ -502,15 +523,18 @@ class MainWindow(QtGui.QMainWindow):
                                 'bids': item['bids'],
                                 'bidders': item1['bidders'],
                                 'date': item1['date'],
+                                'lotnum': item1['lotnum'],
                         }
                         imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
                         for i, imageUrl in enumerate(item1['images']):
                             if i < len(imageFields):
                                 record_item[imageFields[i]] = loadFromUrl(imageUrl)
+                                record_item[imageFields[i] + '_url'] = imageUrl
 
                         record = model.record()
                         for field, value in record_item.items():
                             record.setValue(field, value)
                         model.appendRecordQuiet(record)
 
+                query.exec_()
 #            break

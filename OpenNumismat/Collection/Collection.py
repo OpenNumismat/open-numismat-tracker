@@ -167,9 +167,11 @@ class CollectionModel(QSqlTableModel):
                 file.close()
 
                 query = QSqlQuery(self.database())
-                query.prepare("""INSERT INTO photos (file, position, coin_id)
-                                 VALUES (?, ?, ?)""")
+                query.prepare("""INSERT INTO photos (file, url, position, coin_id)
+                                 VALUES (?, ?, ?, ?)""")
                 query.addBindValue(file_title)
+                url = record.value(field + '_url')
+                query.addBindValue(url)
                 query.addBindValue(i)
                 query.addBindValue(coin_id)
                 query.exec_()
@@ -218,9 +220,11 @@ class CollectionModel(QSqlTableModel):
                     file.close()
 
                     query = QSqlQuery(self.database())
-                    query.prepare("""INSERT INTO photos (file, position, coin_id)
+                    query.prepare("""INSERT INTO photos (file, url, position, coin_id)
                                      VALUES (?, ?, ?)""")
                     query.addBindValue(file_title)
+                    url = record.value(field + '_url')
+                    query.addBindValue(url)
                     query.addBindValue(i)
                     query.addBindValue(coin_id)
                     query.exec_()
@@ -260,11 +264,12 @@ class CollectionModel(QSqlTableModel):
             field = "photo%d" % (i + 1)
             record.append(QSqlField(field))
             record.append(QSqlField(field + '_id'))
+            record.append(QSqlField(field + '_url'))
             record.append(QSqlField(field + '_file'))
 
             if not record.isNull('id'):
                 query = QSqlQuery(self.database())
-                query.prepare("SELECT id, file FROM photos WHERE " \
+                query.prepare("SELECT id, url, file FROM photos WHERE " \
                               "coin_id=? AND position=?")
                 query.addBindValue(record.value('id'))
                 query.addBindValue(i)
@@ -273,11 +278,13 @@ class CollectionModel(QSqlTableModel):
                     img_id = query.record().value('id')
                     record.setValue(field + '_id', img_id)
 
+                    url = query.record().value('url')
+                    record.setValue(field + '_url', url)
+
                     file = query.record().value('file')
                     record.setValue(field + '_file', file)
 
-                    file_title = query.record().value('file')
-                    data = self.getPhoto(file_title)
+                    data = self.getPhoto(file)
                     record.setValue(field, data)
 
         return record
