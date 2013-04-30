@@ -4,8 +4,8 @@ import urllib.parse
 
 from PyQt4 import QtGui, QtCore
 
-from OpenNumismat.EditCoinDialog.Auctions import AuctionItem
-from OpenNumismat.EditCoinDialog.Auctions import _AuctionParser, _NotDoneYetError, _CanceledError
+from OpenNumismat.Auctions import AuctionItem
+from OpenNumismat.Auctions import _AuctionParser, _NotDoneYetError, _CanceledError
 from OpenNumismat.Tools.Converters import stringToMoney
 
 
@@ -185,9 +185,12 @@ class AuctionSpbParser(_AuctionParser):
 
         item = {}
 
+        content = table.cssselect('strong')[0].text_content()
+        item['lotnum'] = content.split('.')[0].split()[-1]
+
         content = table.cssselect('b')[0].text_content()
         date = content.split()[1]  # convert '12:00:00 05-12-07' to '05-12-07'
-        date = QtCore.QDate.fromString(date, 'dd-MM-yy')
+        date = QtCore.QDate.fromString(date, 'dd-MM-yyyy')
         if date.year() < 1960:
             date = date.addYears(100)
         item['date'] = date.toString(QtCore.Qt.ISODate)

@@ -18,6 +18,7 @@ from OpenNumismat.Collection.VersionUpdater import updateCollection
 from OpenNumismat.Tools.CursorDecorators import waitCursorDecorator
 from OpenNumismat.Tools import Gui
 from OpenNumismat.Settings import Settings, BaseSettings
+from OpenNumismat import version
 
 
 class CollectionModel(QSqlTableModel):
@@ -102,6 +103,9 @@ class CollectionModel(QSqlTableModel):
 
         return super(CollectionModel, self).data(index, role)
 
+    def dataDisplayRole(self, index):
+        return super(CollectionModel, self).data(index, Qt.DisplayRole)
+
     def addCoin(self, record, parent=None):
         record.setNull('id')  # remove ID value from record
         dialog = EditCoinDialog(self, record, parent)
@@ -163,9 +167,11 @@ class CollectionModel(QSqlTableModel):
                 file.close()
 
                 query = QSqlQuery(self.database())
-                query.prepare("""INSERT INTO photos (file, position, coin_id)
-                                 VALUES (?, ?, ?)""")
+                query.prepare("""INSERT INTO photos (file, url, position, coin_id)
+                                 VALUES (?, ?, ?, ?)""")
                 query.addBindValue(file_title)
+                url = record.value(field + '_url')
+                query.addBindValue(url)
                 query.addBindValue(i)
                 query.addBindValue(coin_id)
                 query.exec_()
@@ -214,9 +220,11 @@ class CollectionModel(QSqlTableModel):
                     file.close()
 
                     query = QSqlQuery(self.database())
-                    query.prepare("""INSERT INTO photos (file, position, coin_id)
+                    query.prepare("""INSERT INTO photos (file, url, position, coin_id)
                                      VALUES (?, ?, ?)""")
                     query.addBindValue(file_title)
+                    url = record.value(field + '_url')
+                    query.addBindValue(url)
                     query.addBindValue(i)
                     query.addBindValue(coin_id)
                     query.exec_()
@@ -256,11 +264,12 @@ class CollectionModel(QSqlTableModel):
             field = "photo%d" % (i + 1)
             record.append(QSqlField(field))
             record.append(QSqlField(field + '_id'))
+            record.append(QSqlField(field + '_url'))
             record.append(QSqlField(field + '_file'))
 
             if not record.isNull('id'):
                 query = QSqlQuery(self.database())
-                query.prepare("SELECT id, file FROM photos WHERE " \
+                query.prepare("SELECT id, url, file FROM photos WHERE " \
                               "coin_id=? AND position=?")
                 query.addBindValue(record.value('id'))
                 query.addBindValue(i)
@@ -269,11 +278,13 @@ class CollectionModel(QSqlTableModel):
                     img_id = query.record().value('id')
                     record.setValue(field + '_id', img_id)
 
+                    url = query.record().value('url')
+                    record.setValue(field + '_url', url)
+
                     file = query.record().value('file')
                     record.setValue(field + '_file', file)
 
-                    file_title = query.record().value('file')
-                    data = self.getPhoto(file_title)
+                    data = self.getPhoto(file)
                     record.setValue(field, data)
 
         return record
@@ -441,11 +452,23 @@ class CollectionModel(QSqlTableModel):
             combinedFilter = self.intFilter + " AND " + self.extFilter
         else:
             combinedFilter = self.intFilter + self.extFilter
+
+        # Checking for SQLITE_MAX_SQL_LENGTH (default value - 1 000 000)
+        if len(combinedFilter) > 900000:
+            QtGui.QMessageBox.warning(self.parent(),
+                            self.tr("Filtering"),
+                            self.tr("Filter is too complex. Will be ignored"))
+            return
+
         super(CollectionModel, self).setFilter(combinedFilter)
 
 
 class CollectionSettings(BaseSettings):
-    Default = {'Version': 1, 'Password': cryptPassword()}
+    Default = {
+            'Version': 1,
+            'Type': version.AppName,
+            'Password': cryptPassword()
+    }
 
     def __init__(self, collection):
         super(CollectionSettings, self).__init__()
@@ -530,6 +553,11 @@ class Collection(QtCore.QObject):
         self.fileName = fileName
 
         self.settings = CollectionSettings(self)
+        if self.settings['Type'] != version.AppName:
+            QtGui.QMessageBox.critical(self.parent(),
+                    self.tr("Open collection"),
+                    self.tr("Collection %s in wrong format %s") % (fileName, version.AppName))
+            return False
 
         if self.settings['Password'] != cryptPassword():
             dialog = PasswordDialog(self, self.parent())
@@ -624,7 +652,7 @@ class Collection(QtCore.QObject):
                 category_id INTEGER)"""
         QSqlQuery(sql, self.db)
 
-        sql = """CREATE TABLE site (
+        sql = """CREATE TABLE sites (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
                 url TEXT,
@@ -632,7 +660,7 @@ class Collection(QtCore.QObject):
                 firm TEXT)"""
         QSqlQuery(sql, self.db)
 
-        sql = """CREATE TABLE category (
+        sql = """CREATE TABLE categories (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
                 site_id INTEGER)"""
