@@ -18,6 +18,7 @@ from OpenNumismat.Collection.VersionUpdater import updateCollection
 from OpenNumismat.Tools.CursorDecorators import waitCursorDecorator
 from OpenNumismat.Tools import Gui
 from OpenNumismat.Settings import Settings, BaseSettings
+from OpenNumismat import version
 
 
 class CollectionModel(QSqlTableModel):
@@ -101,6 +102,9 @@ class CollectionModel(QSqlTableModel):
                 return Qt.AlignRight | Qt.AlignVCenter
 
         return super(CollectionModel, self).data(index, role)
+
+    def dataDisplayRole(self, index):
+        return super(CollectionModel, self).data(index, Qt.DisplayRole)
 
     def addCoin(self, record, parent=None):
         record.setNull('id')  # remove ID value from record
@@ -441,11 +445,23 @@ class CollectionModel(QSqlTableModel):
             combinedFilter = self.intFilter + " AND " + self.extFilter
         else:
             combinedFilter = self.intFilter + self.extFilter
+
+        # Checking for SQLITE_MAX_SQL_LENGTH (default value - 1 000 000)
+        if len(combinedFilter) > 900000:
+            QtGui.QMessageBox.warning(self.parent(),
+                            self.tr("Filtering"),
+                            self.tr("Filter is too complex. Will be ignored"))
+            return
+
         super(CollectionModel, self).setFilter(combinedFilter)
 
 
 class CollectionSettings(BaseSettings):
-    Default = {'Version': 1, 'Password': cryptPassword()}
+    Default = {
+            'Version': 1,
+            'Type': version.AppName,
+            'Password': cryptPassword()
+    }
 
     def __init__(self, collection):
         super(CollectionSettings, self).__init__()
@@ -530,6 +546,11 @@ class Collection(QtCore.QObject):
         self.fileName = fileName
 
         self.settings = CollectionSettings(self)
+        if self.settings['Type'] != version.AppName:
+            QtGui.QMessageBox.critical(self.parent(),
+                    self.tr("Open collection"),
+                    self.tr("Collection %s in wrong format %s") % (fileName, version.AppName))
+            return False
 
         if self.settings['Password'] != cryptPassword():
             dialog = PasswordDialog(self, self.parent())
