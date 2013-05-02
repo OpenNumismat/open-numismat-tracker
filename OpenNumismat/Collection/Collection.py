@@ -21,6 +21,76 @@ from OpenNumismat.Settings import Settings, BaseSettings
 from OpenNumismat import version
 
 
+class Photo(QtCore.QObject):
+    def __init__(self, db, parent=None):
+        QtCore.QObject.__init__(self, parent)
+        self.db = db
+
+    def fileName(self):
+        if self.file:
+            file_name = self._generateFileName(self.file)
+            if os.path.exists(file_name):
+                return file_name
+
+        if self.url:
+            import urllib.request
+            try:
+                # Wikipedia require any header
+                req = urllib.request.Request(self.url,
+                                    headers={'User-Agent': version.AppName})
+                data = urllib.request.urlopen(req).read()
+                image = QtGui.QImage()
+                result = image.loadFromData(data)
+                if result:
+                    if self.file:
+                        file_name = self._generateFileName(self.file, True)
+                    else:
+                        self.file = str(uuid.uuid1()) + '.jpg'
+                        file_name = self._generateFileName(self.file, True)
+
+                        query = QSqlQuery(self.db)
+                        query.prepare("UPDATE photos SET file=? WHERE id=?")
+                        query.addBindValue(self.file)
+                        query.addBindValue(self.id_)
+                        query.exec_()
+
+                    image.save(file_name)
+
+                    return file_name
+            except:
+                pass
+
+        return None
+
+    def _generateFileName(self, file_title, create_folder=False):
+        path = os.path.join(self.workingDir,
+                            '%s_images' % self.collectionName,
+                            file_title[0:2], file_title[2:4])
+
+        if create_folder:
+            os.makedirs(path, exist_ok=True)
+        file_name = os.path.join(path, file_title)
+
+        return file_name
+
+    @staticmethod
+    def getCoinPhotos(workingDir, collectionName, coin_id, db=QSqlDatabase()):
+        query = QSqlQuery(db)
+        query.prepare("SELECT * FROM photos WHERE " \
+                      "coin_id=? ORDER BY position")
+        query.addBindValue(coin_id)
+        query.exec_()
+        while query.next():
+            photo = Photo(db)
+            photo.coin_id = coin_id
+            photo.id_ = query.record().value('id')
+            photo.file = query.record().value('file')
+            photo.url = query.record().value('url')
+            photo.workingDir = workingDir
+            photo.collectionName = collectionName
+            yield photo
+
+
 class CollectionModel(QSqlTableModel):
     rowInserted = pyqtSignal(object)
     modelChanged = pyqtSignal()
@@ -260,6 +330,16 @@ class CollectionModel(QSqlTableModel):
             data = self.getImage(img_id)
             record.setValue('image', data)
 
+        for i, photo in enumerate(self.getPhotos(row)):
+            # TODO: Fix parent
+            photo.setParent(self)
+
+            field = "photo%d" % (i + 1)
+            record.append(QSqlField(field))
+            record.setValue(field, photo)
+
+        return record
+
         for i in range(4):
             field = "photo%d" % (i + 1)
             record.append(QSqlField(field))
@@ -290,8 +370,9 @@ class CollectionModel(QSqlTableModel):
         return record
 
     def getPhotoFiles(self, row):
-        record = self.record(row)
-        if not record.isNull('id'):
+        if row >= 0:
+            record = super(CollectionModel, self).record(row)
+
             query = QSqlQuery(self.database())
             query.prepare("SELECT file FROM photos WHERE " \
                           "coin_id=? ORDER BY position")
@@ -300,6 +381,14 @@ class CollectionModel(QSqlTableModel):
             while query.next():
                 file_title = query.record().value('file')
                 yield file_title
+
+    def getPhotos(self, row):
+        if row >= 0:
+            record = super(CollectionModel, self).record(row)
+
+            return Photo.getCoinPhotos(self.workingDir, self.collectionName, record.value('id'), self.database())
+        else:
+            return []
 
     def removeRow(self, row):
         for file_title in self.getPhotoFiles(row):

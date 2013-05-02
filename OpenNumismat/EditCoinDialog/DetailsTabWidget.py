@@ -139,8 +139,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
         if not record.isEmpty():
             # Fields with commission dependent on status field and should be
             # filled after it and in right order
-            ordered_item_keys = ['status', 'price', 'paid',
-                                 'bailed']
+            ordered_item_keys = ['status', 'price', 'paid', 'bailed']
             for key in ordered_item_keys:
                 if key in self.items:
                     item = self.items[key]

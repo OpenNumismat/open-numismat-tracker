@@ -19,11 +19,11 @@ class ImageLabel(QtGui.QLabel):
         self.setFocusPolicy(Qt.StrongFocus)
 
         self.srcFile = None
+        self._photo = None
 
     def mouseDoubleClickEvent(self, e):
-        if self.srcFile:
-            fileName = self.srcFile
-        else:
+        fileName = self._photo.fileName()
+        if not fileName:
             tmpDir = QtCore.QDir(TemporaryDir.path())
             file = QtCore.QTemporaryFile(tmpDir.absoluteFilePath("img_XXXXXX.jpg"))
             file.setAutoRemove(False)
@@ -47,6 +47,13 @@ class ImageLabel(QtGui.QLabel):
 
     def showEvent(self, e):
         self._showImage()
+
+    def setPhoto(self, photo):
+        self._photo = photo
+        self.loadFromFile(self._photo.fileName())
+
+    def photo(self):
+        return self._photo
 
     def loadFromData(self, data):
         self._data = data

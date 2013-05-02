@@ -66,9 +66,9 @@ class ImageView(QtGui.QWidget):
         self.showedCount = 0
         for i, btn in enumerate(self.imageButtons):
             if btn.checkState() == Qt.Checked:
-                file_title = self.photos[i]
+                photo = self.photos[i]
                 image = ImageLabel(self)
-                image.loadFromFile(self.model.generatePhotoPath(file_title))
+                image.loadFromFile(photo.fileName())
                 self.imageLayout.addWidget(image)
 
                 self.showedCount = self.showedCount + 1
@@ -84,16 +84,16 @@ class ImageView(QtGui.QWidget):
             btn.stateChanged.connect(self.buttonClicked)
 
         self.photos = []
-        for i, file in enumerate(self.model.getPhotoFiles(current.row())):
+        for i, photo in enumerate(self.model.getPhotos(current.row())):
             self.imageButtons[i].stateChanged.disconnect(self.buttonClicked)
 
-            self.photos.append(file)
+            self.photos.append(photo)
 
             if i < self.showedCount:
                 self.imageButtons[i].setCheckState(Qt.Checked)
 
                 image = ImageLabel(self)
-                image.loadFromFile(self.model.generatePhotoPath(file))
+                image.loadFromFile(photo.fileName())
                 self.imageLayout.addWidget(image)
 
             self.imageButtons[i].setEnabled(True)
