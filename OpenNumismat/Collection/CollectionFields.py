@@ -53,7 +53,7 @@ class CollectionFieldsBase(QObject):
                 ('fineness', self.tr("Fineness"), Type.Value),
                 ('weight', self.tr("Weight"), Type.Value),
                 ('grade', self.tr("Grade"), Type.String),
-                ('catalognum', self.tr("1#"), Type.String),
+                ('catalognum', self.tr("Catalog #"), Type.String),
                 ('rarity', self.tr("Rarity"), Type.String),
                 ('variety', self.tr("Variety"), Type.String),
                 ('paid', self.tr("Paid"), Type.Money),
@@ -64,16 +64,18 @@ class CollectionFieldsBase(QObject):
                 ('buyer', self.tr("Buyer"), Type.String),
                 ('bids', self.tr("Bids"), Type.String),
                 ('bidders', self.tr("Bidders"), Type.String),
-                ('auction', self.tr("Auction"), Type.String),
+                ('auctionnum', self.tr("Auction #"), Type.BigInt),
                 ('lotnum', self.tr("Lot #"), Type.BigInt),
                 ('info', self.tr("Info"), Type.Text),
+                ('quantity', self.tr("Quantity"), Type.BigInt),
+                ('url', self.tr("URL"), Type.String),
+                ('site', self.tr("Site"), Type.String),
+                ('firm', self.tr("Firm"), Type.String),
                 ('image', self.tr("Image"), Type.Image),
                 ('photo1', self.tr("Photo 1"), Type.Photo),
                 ('photo2', self.tr("Photo 2"), Type.Photo),
                 ('photo3', self.tr("Photo 3"), Type.Photo),
                 ('photo4', self.tr("Photo 4"), Type.Photo),
-                ('quantity', self.tr("Quantity"), Type.BigInt),
-                ('url', self.tr("URL"), Type.String),
                 ('createdat', self.tr("Created at"), Type.DateTime),
                 ('updatedat', self.tr("Updated at"), Type.DateTime),
             ]
@@ -84,9 +86,9 @@ class CollectionFieldsBase(QObject):
                             CollectionField(id_, field[0], field[1], field[2]))
             setattr(self, self.fields[id_].name, self.fields[id_])
 
-        self.systemFileds = [self.id, self.createdat, self.updatedat]
+        self.systemFileds = [self.id, self.createdat, self.updatedat, self.image]
         self.userFields = list(self.fields)
-        for item in self.systemFileds:
+        for item in [self.id, self.createdat, self.updatedat]:
             self.userFields.remove(item)
 
     def field(self, id_):

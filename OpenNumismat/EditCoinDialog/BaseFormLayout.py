@@ -125,7 +125,7 @@ class FormItem(object):
 
     def setValue(self, value):
         if isinstance(self._widget, ImageEdit):
-            self._widget.loadFromFile(value.fileName())
+            self._widget.setPhoto(value)
         elif isinstance(self._widget, QtGui.QSpinBox):
             self._widget.setValue(int(value))
         elif isinstance(self._widget, QtGui.QDoubleSpinBox):

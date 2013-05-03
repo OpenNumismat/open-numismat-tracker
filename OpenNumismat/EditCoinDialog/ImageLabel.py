@@ -18,9 +18,6 @@ class ImageLabel(QtGui.QLabel):
         self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.setFocusPolicy(Qt.StrongFocus)
 
-        self.srcFile = None
-        self._photo = None
-
     def mouseDoubleClickEvent(self, e):
         fileName = self._photo.fileName()
         if not fileName:
@@ -62,7 +59,6 @@ class ImageLabel(QtGui.QLabel):
         result = image.loadFromData(data)
         if result:
             self._setImage(image)
-            self.srcFile = None
 
         return result
 
@@ -71,7 +67,6 @@ class ImageLabel(QtGui.QLabel):
         result = image.load(fileName)
         if result:
             self._setImage(image)
-            self.srcFile = fileName
 
         return result
 
@@ -111,8 +106,6 @@ class ImageEdit(ImageLabel):
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
-
-        self.changed = False
 
     def contextMenu(self, pos):
         style = QtGui.QApplication.style()
@@ -174,7 +167,8 @@ class ImageEdit(ImageLabel):
 
     def deleteImage(self):
         self.clear()
-        self.changed = True
+        self._photo.clear()
+        self._photo.changed = True
 
     def saveImage(self):
         caption = QApplication.translate('ImageEdit', "Save File")
@@ -214,13 +208,18 @@ class ImageEdit(ImageLabel):
                         "No image available\n(right-click to add an image)")
         self.setText(text)
 
-    def loadFromFile(self, fileName):
-        image = QtGui.QImage()
-        result = image.load(fileName)
-        if result:
-            self._setNewImage(image)
+    def setPhoto(self, photo):
+        self._photo = photo
 
-        return result
+        self.loadFromFile(self._photo.fileName())
+        self._photo.changed = False
+
+    def loadFromFile(self, fileName):
+        if fileName:
+            image = QtGui.QImage()
+            result = image.load(fileName)
+            if result:
+                self._setNewImage(image)
 
     def loadFromUrl(self, url):
         result = False
@@ -241,9 +240,10 @@ class ImageEdit(ImageLabel):
         return result
 
     def data(self):
-        if self.changed:
-            return self.image
-        return self._data
+        if self.image:
+            self._photo.image = self.image
+
+        return self._photo
 
     def _setNewImage(self, image):
         # Fill transparent color if present
@@ -254,4 +254,4 @@ class ImageEdit(ImageLabel):
         painter.end()
 
         self._setImage(fixedImage)
-        self.changed = True
+        self._photo.changed = True
