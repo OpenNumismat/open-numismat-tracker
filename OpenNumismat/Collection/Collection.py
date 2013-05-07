@@ -104,11 +104,11 @@ class Photo(QtCore.QObject):
                 req = urllib.request.Request(self.url,
                                     headers={'User-Agent': version.AppName})
                 data = urllib.request.urlopen(req).read()
-                image = QtGui.QImage()
-                result = image.loadFromData(data)
+                self.image = QtGui.QImage()
+                result = self.image.loadFromData(data)
                 if result:
                     self.save()
-                    return self._generateFileName(self.file())
+                    return self._generateFileName(self.file)
             except:
                 pass
 

@@ -462,6 +462,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def importEvent(self):
         from PyQt4 import QtSql
+        from OpenNumismat.Collection.Collection import Photo
 
         model = self.collection.model()
 
@@ -479,13 +480,13 @@ class MainWindow(QtGui.QMainWindow):
                 item1 = parser.parse(items[0]['url'])
 
                 query = QtSql.QSqlQuery(self.collection.db)
-                query.prepare("INSERT INTO auctions (url, number, date, site_id, category_id)" \
+                query.prepare("INSERT INTO auctions (number, date, site, firm, category)" \
                               " VALUES (?, ?, ?, ?, ?)")
-                query.addBindValue(url)
                 query.addBindValue(auctNo)
                 query.addBindValue(item1['date'])
-                query.addBindValue(1)
-                query.addBindValue(category)
+                query.addBindValue('Аукцион')
+                query.addBindValue('АукционЪ.СПб')
+                query.addBindValue(parser.category(category))
 
                 query.exec_()
 
@@ -500,8 +501,6 @@ class MainWindow(QtGui.QMainWindow):
 
                     for item in items:
                         item1 = parser.parse(item['url'])
-    #                    print(item)
-    #                    print(item1)
 
                         record_item = {
                                 'title': item1['title'],
@@ -524,17 +523,21 @@ class MainWindow(QtGui.QMainWindow):
                                 'bidders': item1['bidders'],
                                 'date': item1['date'],
                                 'lotnum': item1['lotnum'],
+                                'auctionnum': auctNo,
+                                'site': 'Аукцион',
+                                'firm': 'АукционЪ.СПб',
+                                'category': parser.category(category),
                         }
                         imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
                         for i, imageUrl in enumerate(item1['images']):
                             if i < len(imageFields):
-                                record_item[imageFields[i]] = loadFromUrl(imageUrl)
-                                record_item[imageFields[i] + '_url'] = imageUrl
+                                photo = Photo(None, model)
+                                photo.image = loadFromUrl(imageUrl)
+                                photo.url = imageUrl
+                                photo.changed = True
+                                record_item[imageFields[i]] = photo
 
                         record = model.record()
                         for field, value in record_item.items():
                             record.setValue(field, value)
                         model.appendRecordQuiet(record)
-
-                query.exec_()
-#            break

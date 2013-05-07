@@ -1,6 +1,7 @@
 import codecs
 import locale
 import os
+import shutil
 
 try:
 # TODO: For speedup use additional a http://pypi.python.org/pypi/MarkupSafe
@@ -203,8 +204,7 @@ class Report(QtCore.QObject):
         return dstFile
 
     def __recordMapping(self, record):
-        imgFields = ['photo1', 'photo2', 'photo3', 'photo4',
-                     'photo5', 'photo6', 'photo7', 'photo8']
+        imgFields = ['photo1', 'photo2', 'photo3', 'photo4']
 
         record_mapping = {}
         record_mapping['date_js'] = ''
@@ -224,10 +224,13 @@ class Report(QtCore.QObject):
                     imgFileTitle = "%s_%d.%s" % (field.name, record.value('id'), ext)
                     imgFile = os.path.join(self.contentDir, imgFileTitle)
 
-                    image = QtGui.QImage()
-                    image.loadFromData(record.value(field.name))
-                    image.save(imgFile)
-                    record_mapping[field.name] = imgFileTitle
+                    photo = record.value(field.name)
+                    srcFile = photo.fileName()
+                    if srcFile:
+                        shutil.copyfile(srcFile, imgFile)
+                        record_mapping[field.name] = imgFileTitle
+                    else:
+                        record_mapping[field.name] = ''
                 else:
                     record_mapping[field.name] = formatFields(field, value)
                     if field.name == 'date':
