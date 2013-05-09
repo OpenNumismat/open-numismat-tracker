@@ -1,7 +1,7 @@
 from PyQt4 import QtCore
 from PyQt4.QtSql import QSqlQuery, QSqlRecord
 
-from OpenNumismat.Collection.HeaderFilterMenu import ColumnFilters
+from OpenNumismat.Collection.HeaderFilterMenu import ColumnFilters, ValueFilter, DataFilter, BlankFilter
 
 
 class ColumnListParam:

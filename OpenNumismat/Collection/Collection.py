@@ -74,13 +74,17 @@ class Photo(QtCore.QObject):
 
                     self.id_ = query.lastInsertId()
 
-            file_name = self._generateFileName(self.file, True)
-            self.image.save(file_name)
+            if self.image:
+                file_name = self._generateFileName(self.file, True)
+                self.image.save(file_name)
 
     def remove(self):
         if self.file:
             file_name = self._generateFileName(self.file)
-            os.remove(file_name)
+            try:
+                os.remove(file_name)
+            except FileNotFoundError:
+                pass
             self.file = None
 
         if self.id_:
@@ -97,6 +101,13 @@ class Photo(QtCore.QObject):
             if os.path.exists(file_name):
                 return file_name
 
+        if self.uploadImage():
+            self.save()
+            return self._generateFileName(self.file)
+
+        return None
+
+    def uploadImage(self):
         if self.url:
             import urllib.request
             try:
@@ -105,14 +116,11 @@ class Photo(QtCore.QObject):
                                     headers={'User-Agent': version.AppName})
                 data = urllib.request.urlopen(req).read()
                 self.image = QtGui.QImage()
-                result = self.image.loadFromData(data)
-                if result:
-                    self.save()
-                    return self._generateFileName(self.file)
+                return self.image.loadFromData(data)
             except:
-                pass
+                print('Can not load image %s' % self.url)
 
-        return None
+        return False
 
     def _generateFileName(self, file_title, create_folder=False):
         path = os.path.join(self.workingDir,

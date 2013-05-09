@@ -14,29 +14,9 @@ from OpenNumismat.Tools.CursorDecorators import waitCursorDecorator
 from OpenNumismat.Tools.Gui import createIcon
 from OpenNumismat.Reports.Preview import PreviewDialog
 from OpenNumismat import version
+from OpenNumismat.Tools import Gui
 
 from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
-
-
-def loadFromUrl(url):
-    image = QtGui.QImage()
-    try:
-        # Wikipedia require any header
-        req = urllib.request.Request(url,
-                                headers={'User-Agent': "OpenNumismat"})
-        data = urllib.request.urlopen(req).read()
-        image.loadFromData(data)
-    except:
-        try:
-            # Wikipedia require any header
-            req = urllib.request.Request(url,
-                                    headers={'User-Agent': "OpenNumismat"})
-            data = urllib.request.urlopen(req).read()
-            image.loadFromData(data)
-        except:
-            print('Can not load image %s' % url)
-
-    return image
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -54,6 +34,9 @@ class MainWindow(QtGui.QMainWindow):
         importAct = QtGui.QAction(self.tr("Import"), self)
         importAct.triggered.connect(self.importEvent)
 
+        uploadImagesAct = QtGui.QAction(self.tr("Upload images"), self)
+        uploadImagesAct.triggered.connect(self.uploadImagesEvent)
+
         cancelFilteringAct = QtGui.QAction(createIcon('funnel.png'),
                                     self.tr("Clear all filters"), self)
         cancelFilteringAct.triggered.connect(self.cancelFilteringEvent)
@@ -66,6 +49,8 @@ class MainWindow(QtGui.QMainWindow):
         menubar = self.menuBar()
         file = menubar.addMenu(self.tr("&File"))
         file.addAction(importAct)
+        file.addAction(uploadImagesAct)
+        file.addSeparator()
         file.addAction(settingsAct)
         file.addSeparator()
         file.addAction(exitAct)
@@ -460,6 +445,35 @@ class MainWindow(QtGui.QMainWindow):
 
         return newVersion
 
+    def uploadImagesEvent(self):
+        from PyQt4 import QtSql
+        from OpenNumismat.Collection.Collection import Photo
+
+        model = self.collection.model()
+
+        query = QtSql.QSqlQuery(self.collection.db)
+        query.prepare("SELECT count(*) FROM photos WHERE ifnull(url,'')<>''")
+        query.exec_()
+        if query.first():
+            count = query.record().value(0)
+            progressDlg = Gui.ProgressDialog(self.tr("Uploading images"),
+                                self.tr("Cancel"), count, self)
+
+            query = QtSql.QSqlQuery(self.collection.db)
+            query.prepare("SELECT id FROM photos WHERE ifnull(url,'')<>''")
+            query.exec_()
+
+            while query.next():
+                progressDlg.step()
+                if progressDlg.wasCanceled():
+                    break
+
+                photo = Photo(query.record().value('id'), model)
+                photo.fileName()
+
+            progressDlg.reset()
+            query.clear()
+
     def importEvent(self):
         from PyQt4 import QtSql
         from OpenNumismat.Collection.Collection import Photo
@@ -532,8 +546,8 @@ class MainWindow(QtGui.QMainWindow):
                         for i, imageUrl in enumerate(item1['images']):
                             if i < len(imageFields):
                                 photo = Photo(None, model)
-                                photo.image = loadFromUrl(imageUrl)
                                 photo.url = imageUrl
+                                photo.uploadImage()
                                 photo.changed = True
                                 record_item[imageFields[i]] = photo
 
