@@ -33,9 +33,10 @@ class DetailsTabWidget(QtGui.QTabWidget):
         self.addTabPage(title, [main, self.Stretch, state])
 
     def createTrafficPage(self):
-        pass_ = self.passLayout()
+        pass1 = self.pass1Layout()
+        pass2 = self.pass2Layout()
         title = QApplication.translate('DetailsTabWidget', "Traffic")
-        self.addTabPage(title, [pass_, ])
+        self.addTabPage(title, [pass1, self.Stretch, pass2])
 
     def createParametersPage(self):
         parameters = self.parametersLayout()
@@ -171,8 +172,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
         layout.addRow(self.items['country'])
         layout.addRow(self.items['period'])
         layout.addRow(self.items['denomination'])
-        layout.addRow(self.items['year'])
-        layout.addRow(self.items['mintmark'])
+        layout.addRow(self.items['year'], self.items['mintmark'])
         layout.addRow(self.items['category'])
         layout.addRow(self.items['subject'])
 
@@ -187,11 +187,22 @@ class DetailsTabWidget(QtGui.QTabWidget):
 
         return layout
 
-    def passLayout(self, parent=None):
+    def pass1Layout(self, parent=None):
         title = QApplication.translate('DetailsTabWidget', "Pass")
         layout = BaseFormGroupBox(title, parent)
 
-        layout.addRow(self.items['date'])
+        layout.addRow(self.items['price'], self.items['date'])
+
+        layout.addRow(self.items['bids'], self.items['bidders'])
+        layout.addRow(self.items['place'], self.items['site'])
+        layout.addRow(self.items['auctionnum'], self.items['lotnum'])
+        layout.addRow(self.items['url'])
+
+        return layout
+
+    def pass2Layout(self, parent=None):
+        title = QApplication.translate('DetailsTabWidget', "Pass details")
+        layout = BaseFormGroupBox(title, parent)
 
         # Add auxiliary field
         item = self.addPayCommission()
@@ -201,11 +212,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
         item = self.addSaleCommission()
         layout.addRow(self.items['totalsaleprice'], item)
 
-        layout.addRow(self.items['saller'])
-        layout.addRow(self.items['buyer'])
-        layout.addRow(self.items['bids'], self.items['bidders'])
-#        layout.addRow(self.items['auction'], self.items['auctionnum'])
-        layout.addRow(self.items['url'])
+        layout.addRow(self.items['saller'], self.items['buyer'])
 
         layout.addRow(self.items['info'])
 
@@ -328,14 +335,12 @@ class FormDetailsTabWidget(DetailsTabWidget):
 
     def mainDetailsLayout(self, parent=None):
         layout = BaseFormGroupBox(self.tr("Main details"), parent)
-        layout.layout.columnCount = 6
 
         layout.addRow(self.items['title'])
         layout.addRow(self.items['country'])
         layout.addRow(self.items['period'])
         layout.addRow(self.items['denomination'])
-        layout.addRow(self.items['year'])
-        layout.addRow(self.items['mintmark'])
+        layout.addRow(self.items['year'], self.items['mintmark'])
         layout.addRow(self.items['category'])
         layout.addRow(self.items['subject'])
 
