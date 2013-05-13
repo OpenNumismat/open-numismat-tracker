@@ -57,8 +57,8 @@ var chartCursor;
 function CreateAukGraphs(sohrname) {
     if (sohrname=='Proof') {
         chart.graphs[0].valueField='p1';
-{% for firm in records|groupby('firm') %}
-        CreateAukGraph("{{firm.grouper}}","k6a1");
+{% for place in records|groupby('place') %}
+        CreateAukGraph("{{place.grouper}}","k6a1");
 {% endfor %}
     }
 }
@@ -173,7 +173,7 @@ vtableold.innerHTML=vtableold.innerHTML.replace(/imgqwe/g,'img').replace(/IMGQWE
     <font face="arial" size="2" style="cursor:default">{{record.grade}}</font>
   </td>
   <td align="center" width="90">
-    <font face="arial" size="2" style="cursor:default">{{record.firm}}</font>
+    <font face="arial" size="2" style="cursor:default">{{record.place}}</font>
   </td>
   <td align="center" width="90">
     <font face="arial" size="2" style="cursor:default">{{record.buyer}}</font>

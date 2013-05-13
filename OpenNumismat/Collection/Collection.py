@@ -622,7 +622,7 @@ class Collection(QtCore.QObject):
                 variety TEXT, totalpayprice NUMERIC, saller TEXT, date TEXT,
                 price NUMERIC, totalsaleprice NUMERIC, buyer TEXT, bids TEXT,
                 bidders TEXT, auctionnum INTEGER, lotnum INTEGER, info TEXT,
-                quantity INTEGER, url TEXT, site TEXT, firm TEXT,
+                quantity INTEGER, url TEXT, site TEXT, place TEXT,
                 image INTEGER, photo1 INTEGER, photo2 INTEGER, photo3 INTEGER,
                 photo4 INTEGER, createdat TEXT, updatedat TEXT)"""
         QSqlQuery(sql, self.db)
@@ -646,7 +646,7 @@ class Collection(QtCore.QObject):
                 date TEXT,
                 number INTEGER,
                 site TEXT,
-                firm TEXT,
+                place TEXT,
                 category TEXT)"""
         QSqlQuery(sql, self.db)
 

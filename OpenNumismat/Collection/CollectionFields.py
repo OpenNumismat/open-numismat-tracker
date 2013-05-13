@@ -70,7 +70,7 @@ class CollectionFieldsBase(QObject):
                 ('quantity', self.tr("Quantity"), Type.BigInt),
                 ('url', self.tr("URL"), Type.String),
                 ('site', self.tr("Site"), Type.String),
-                ('firm', self.tr("Firm"), Type.String),
+                ('place', self.tr("Firm"), Type.String),
                 ('image', self.tr("Image"), Type.Image),
                 ('photo1', self.tr("Photo 1"), Type.Photo),
                 ('photo2', self.tr("Photo 2"), Type.Photo),

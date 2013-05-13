@@ -494,7 +494,7 @@ class MainWindow(QtGui.QMainWindow):
                 item1 = parser.parse(items[0]['url'])
 
                 query = QtSql.QSqlQuery(self.collection.db)
-                query.prepare("INSERT INTO auctions (number, date, site, firm, category)" \
+                query.prepare("INSERT INTO auctions (number, date, site, place, category)" \
                               " VALUES (?, ?, ?, ?, ?)")
                 query.addBindValue(auctNo)
                 query.addBindValue(item1['date'])
@@ -519,18 +519,15 @@ class MainWindow(QtGui.QMainWindow):
                         record_item = {
                                 'title': item1['title'],
                                 'denomination': item['denomination'],
-                                'country': None,
                                 'year': item['year'],
-                                'period': None,
                                 'mintmark': item['mintmark'],
                                 'category': parser.category(category),
                                 'status': 'pass',
                                 'material': item['material'],
                                 'grade': item['grade'],
-                                'auction_id': auct_id,
                                 'price': item['price'],
-                                'paid': item['totalPayPrice'],
-                                'bailed': item['totalSalePrice'],
+                                'totalpayprice': item['totalPayPrice'],
+                                'totalsaleprice': item['totalSalePrice'],
                                 'buyer': item['buyer'],
                                 'url': item['url'],
                                 'bids': item['bids'],
@@ -539,7 +536,7 @@ class MainWindow(QtGui.QMainWindow):
                                 'lotnum': item1['lotnum'],
                                 'auctionnum': auctNo,
                                 'site': 'Аукцион',
-                                'firm': 'АукционЪ.СПб',
+                                'place': 'АукционЪ.СПб',
                                 'category': parser.category(category),
                         }
                         imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
