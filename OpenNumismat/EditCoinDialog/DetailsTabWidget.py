@@ -301,8 +301,11 @@ class FormDetailsTabWidget(DetailsTabWidget):
         self.createImagePage()
 
     def createImagePage(self):
-        images = self.imagesLayout()
-        self.addTabPage(self.tr("Images"), [images, ])
+        if self.usedFields:
+            self.addTabPage(self.tr("Images"), [])
+        else:
+            images = self.imagesLayout()
+            self.addTabPage(self.tr("Images"), [images, ])
 
     def addItem(self, field):
         checkable = 0

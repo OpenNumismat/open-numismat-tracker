@@ -375,6 +375,9 @@ class CollectionModel(QSqlTableModel):
         # Creating preview image for list
         if record.isNull('photo1') and record.isNull('photo2'):
             record.setNull('image')
+        elif (record.isNull('photo1') or not record.value('photo1').changed) and \
+             (record.isNull('photo2') or not record.value('photo2').changed):
+            pass
         else:
             # Get height of list view for resizing images
             tmp = QtGui.QTableView()

@@ -101,6 +101,7 @@ class ImageEdit(ImageLabel):
         super(ImageEdit, self).__init__(parent)
 
         self.name = name or 'photo'
+        self._photo = None
 
         self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Plain)
 
@@ -240,6 +241,9 @@ class ImageEdit(ImageLabel):
         return result
 
     def data(self):
+        if not self._photo:
+            return None
+
         if self.image:
             self._photo.image = self.image
 
