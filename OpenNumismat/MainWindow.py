@@ -380,7 +380,7 @@ class MainWindow(QtGui.QMainWindow):
                         (version.AppName, version.Version, version.AppName))
 
     def onlineHelp(self):
-        url = QtCore.QUrl(version.Web')
+        url = QtCore.QUrl(version.Web)
 
         executor = QtGui.QDesktopServices()
         executor.openUrl(url)
