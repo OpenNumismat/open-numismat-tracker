@@ -34,7 +34,7 @@ class Photo(QtCore.QObject):
         self.collectionName = model.collectionName
         self.changed = False
         self.cleared = False
-        self.image = None
+        self.image = QtGui.QImage()
 
         query = QSqlQuery(self.db)
         query.prepare("SELECT * FROM photos WHERE id=?")
@@ -48,8 +48,7 @@ class Photo(QtCore.QObject):
         self.cleared = True
 
     def isNull(self):
-        return not self.file and not self.url and \
-                                        (not self.image or self.image.isNull())
+        return not self.file and not self.url and self.image.isNull()
 
     def save(self):
         if self.cleared or self.isNull():
@@ -74,7 +73,7 @@ class Photo(QtCore.QObject):
 
                     self.id_ = query.lastInsertId()
 
-            if self.image:
+            if not self.image.isNull():
                 file_name = self._generateFileName(self.file, True)
                 self.image.save(file_name)
 
@@ -115,7 +114,6 @@ class Photo(QtCore.QObject):
                 req = urllib.request.Request(self.url,
                                     headers={'User-Agent': version.AppName})
                 data = urllib.request.urlopen(req).read()
-                self.image = QtGui.QImage()
                 return self.image.loadFromData(data)
             except:
                 print('Can not load image %s' % self.url)
@@ -373,7 +371,8 @@ class CollectionModel(QSqlTableModel):
 #                    record.setValue(field.name, ba)
 
         # Creating preview image for list
-        if record.isNull('photo1') and record.isNull('photo2'):
+        if (record.isNull('photo1') or record.value('photo1').isNull()) and \
+           (record.isNull('photo2') or record.value('photo2').isNull()):
             record.setNull('image')
         elif (record.isNull('photo1') or not record.value('photo1').changed) and \
              (record.isNull('photo2') or not record.value('photo2').changed):
