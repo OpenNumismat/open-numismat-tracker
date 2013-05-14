@@ -375,12 +375,12 @@ class MainWindow(QtGui.QMainWindow):
     def about(self):
         QtGui.QMessageBox.about(self, self.tr("About %s") % version.AppName,
                 self.tr("%s %s\n\n"
-                        "Copyright (C) 2011-2013 Vitaly Ignatov\n\n"
+                        "Copyright (C) 2013 Vitaly Ignatov\n\n"
                         "%s is freeware licensed under a GPLv3.") %
                         (version.AppName, version.Version, version.AppName))
 
     def onlineHelp(self):
-        url = QtCore.QUrl(version.Web + 'wiki/MainPage')
+        url = QtCore.QUrl(version.Web')
 
         executor = QtGui.QDesktopServices()
         executor.openUrl(url)
@@ -434,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
         newVersion = version.Version
 
         try:
-            url = "http://wiki.open-numismat.googlecode.com/git/data/pad.xml"
+            url = "http://wiki.open-numismat-tracker.googlecode.com/git/data/pad.xml"
             req = urllib.request.Request(url)
             data = urllib.request.urlopen(req).read()
             xml = parseString(data)

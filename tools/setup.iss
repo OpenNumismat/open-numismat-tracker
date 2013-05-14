@@ -1,14 +1,14 @@
 [Setup]
-AppName=OpenNumismat
-AppId=OpenNumismat
-AppVersion=1.4.4
-DefaultDirName={pf}\OpenNumismat
-DefaultGroupName=OpenNumismat
-UninstallDisplayIcon={app}\OpenNumismat.exe
+AppName=NumismatTracker
+AppId=NumismatTracker
+AppVersion=0.0.1
+DefaultDirName={pf}\NumismatTracker
+DefaultGroupName=NumismatTracker
+UninstallDisplayIcon={app}\NumismatTracker.exe
 OutputDir="."
-OutputBaseFilename="OpenNumismat-1.4.4"
+OutputBaseFilename="NumismatTracker-0.0.1"
 AllowNoIcons=yes
-AppCopyright=Copyright 2011-2013 by Vitaly Ignatov
+AppCopyright=Copyright 2013 by Vitaly Ignatov
 AppPublisher=Janis
 
 [Languages]
@@ -27,33 +27,28 @@ hu.sendReport=Hiba elkuldese a keszitonek
 
 [Files]
 Source: "..\build\exe.win32-3.2\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
-Source: "..\build\exe.win32-3.2\db\demo_en.db"; DestDir: "{userdocs}\OpenNumismat"; DestName: "demo.db"; Languages: en; Flags: onlyifdoesntexist
-Source: "..\build\exe.win32-3.2\db\demo_ru.db"; DestDir: "{userdocs}\OpenNumismat"; DestName: "demo.db"; Languages: ru; Flags: onlyifdoesntexist
-Source: "..\build\exe.win32-3.2\db\demo_uk.db"; DestDir: "{userdocs}\OpenNumismat"; DestName: "demo.db"; Languages: uk; Flags: onlyifdoesntexist
-Source: "..\build\exe.win32-3.2\db\demo_es.db"; DestDir: "{userdocs}\OpenNumismat"; DestName: "demo.db"; Languages: es; Flags: onlyifdoesntexist
-Source: "..\build\exe.win32-3.2\db\demo_hu.db"; DestDir: "{userdocs}\OpenNumismat"; DestName: "demo.db"; Languages: hu; Flags: onlyifdoesntexist
-Source: "..\build\exe.win32-3.2\db\reference_en.ref"; DestDir: "{userdocs}\OpenNumismat"; DestName: "reference.ref"; Languages: en; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_ru.ref"; DestDir: "{userdocs}\OpenNumismat"; DestName: "reference.ref"; Languages: ru; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_uk.ref"; DestDir: "{userdocs}\OpenNumismat"; DestName: "reference.ref"; Languages: uk; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_es.ref"; DestDir: "{userdocs}\OpenNumismat"; DestName: "reference.ref"; Languages: es; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_hu.ref"; DestDir: "{userdocs}\OpenNumismat"; DestName: "reference.ref"; Languages: hu; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.2\db\reference_en.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: en; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.2\db\reference_ru.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: ru; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.2\db\reference_uk.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: uk; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.2\db\reference_es.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: es; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.2\db\reference_hu.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: hu; Flags: confirmoverwrite
 
 [Dirs]
-Name: "{userdocs}\OpenNumismat\backup"
+Name: "{userdocs}\NumismatTracker\backup"
 
 [Registry]
 Root: HKCU; Subkey: "Software\Janis"; Flags: uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\Janis\OpenNumismat"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Janis\OpenNumismat\mainwindow"; ValueType: string; ValueName: "error"; ValueData: "true"; Tasks: sendreport
+Root: HKCU; Subkey: "Software\Janis\NumismatTracker"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Janis\NumismatTracker\mainwindow"; ValueType: string; ValueName: "error"; ValueData: "true"; Tasks: sendreport
 
 [Icons]
-Name: "{group}\OpenNumismat"; Filename: "{app}\OpenNumismat.exe"
-Name: "{group}\Uninstall OpenNumismat"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\OpenNumismat"; Filename: "{app}\OpenNumismat.exe"; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenNumismat"; Filename: "{app}\OpenNumismat.exe"; Tasks: quicklaunchicon
+Name: "{group}\NumismatTracker"; Filename: "{app}\NumismatTracker.exe"
+Name: "{group}\Uninstall NumismatTracker"; Filename: "{uninstallexe}"
+Name: "{userdesktop}\NumismatTracker"; Filename: "{app}\NumismatTracker.exe"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\NumismatTracker"; Filename: "{app}\NumismatTracker.exe"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\OpenNumismat.exe"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\NumismatTracker.exe"; Flags: postinstall nowait skipifsilent
 
 [Tasks]
 Name: sendreport; Description: "{cm:sendReport}"
