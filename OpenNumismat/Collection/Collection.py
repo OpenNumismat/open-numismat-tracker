@@ -257,6 +257,7 @@ class CollectionModel(QSqlTableModel):
                 photo = record.value(field)
                 if photo.changed:
                     photo.save()
+                photo.image = QtGui.QImage()  # free image
                 record.setValue(field, photo.id_)
 
         return super(CollectionModel, self).insertRecord(row, record)
@@ -296,6 +297,7 @@ class CollectionModel(QSqlTableModel):
                 photo = record.value(field)
                 if photo.changed:
                     photo.save()
+                photo.image = QtGui.QImage()  # free image
                 record.setValue(field, photo.id_)
 
         return super(CollectionModel, self).setRecord(row, record)

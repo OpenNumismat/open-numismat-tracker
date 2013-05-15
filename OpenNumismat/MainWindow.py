@@ -544,9 +544,10 @@ class MainWindow(QtGui.QMainWindow):
                             if i < len(imageFields):
                                 photo = Photo(None, model)
                                 photo.url = imageUrl
-                                if not photo.uploadImage():
-                                    # When error - repeat uploading
-                                    photo.uploadImage()
+                                # When error - repeat uploading
+                                for _ in range(5):
+                                    if photo.uploadImage():
+                                        break
 
                                 photo.changed = True
                                 record_item[imageFields[i]] = photo
