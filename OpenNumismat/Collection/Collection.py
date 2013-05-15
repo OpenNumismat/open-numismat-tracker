@@ -50,6 +50,9 @@ class Photo(QtCore.QObject):
     def isNull(self):
         return not self.file and not self.url and self.image.isNull()
 
+    def isEmpty(self):
+        return self.image.isNull()
+
     def save(self):
         if self.cleared or self.isNull():
             self.remove()
@@ -371,8 +374,8 @@ class CollectionModel(QSqlTableModel):
 #                    record.setValue(field.name, ba)
 
         # Creating preview image for list
-        if (record.isNull('photo1') or record.value('photo1').isNull()) and \
-           (record.isNull('photo2') or record.value('photo2').isNull()):
+        if (record.isNull('photo1') or record.value('photo1').isEmpty()) and \
+           (record.isNull('photo2') or record.value('photo2').isEmpty()):
             record.setNull('image')
         elif (record.isNull('photo1') or not record.value('photo1').changed) and \
              (record.isNull('photo2') or not record.value('photo2').changed):
