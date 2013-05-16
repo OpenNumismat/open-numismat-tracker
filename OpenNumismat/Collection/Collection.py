@@ -376,8 +376,8 @@ class CollectionModel(QSqlTableModel):
 #                    record.setValue(field.name, ba)
 
         # Creating preview image for list
-        if (record.isNull('photo1') or record.value('photo1').isEmpty()) and \
-           (record.isNull('photo2') or record.value('photo2').isEmpty()):
+        if (record.isNull('photo1') or record.value('photo1').isNull()) and \
+           (record.isNull('photo2') or record.value('photo2').isNull()):
             record.setNull('image')
         elif (record.isNull('photo1') or not record.value('photo1').changed) and \
              (record.isNull('photo2') or not record.value('photo2').changed):
