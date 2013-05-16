@@ -26,12 +26,12 @@ es.sendReport=Enviar un informe al autor del sitio web si cualquier error
 hu.sendReport=Hiba elkuldese a keszitonek
 
 [Files]
-Source: "..\build\exe.win32-3.2\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
-Source: "..\build\exe.win32-3.2\db\reference_en.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: en; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_ru.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: ru; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_uk.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: uk; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_es.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: es; Flags: confirmoverwrite
-Source: "..\build\exe.win32-3.2\db\reference_hu.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: hu; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.3\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "..\build\exe.win32-3.3\db\reference_en.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: en; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.3\db\reference_ru.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: ru; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.3\db\reference_uk.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: uk; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.3\db\reference_es.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: es; Flags: confirmoverwrite
+Source: "..\build\exe.win32-3.3\db\reference_hu.ref"; DestDir: "{userdocs}\NumismatTracker"; DestName: "reference.ref"; Languages: hu; Flags: confirmoverwrite
 
 [Dirs]
 Name: "{userdocs}\NumismatTracker\backup"
