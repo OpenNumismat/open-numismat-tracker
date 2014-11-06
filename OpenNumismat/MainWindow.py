@@ -517,7 +517,6 @@ class MainWindow(QMainWindow):
                     for page in parser.pages(auctNo, category):
                         url = parser.getPageUrl(auctNo, category, page)
                         items = parser.parsePage(url)
-                        print(len(items))
                         if not items:
                             break
     

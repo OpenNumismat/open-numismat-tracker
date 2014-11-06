@@ -636,7 +636,6 @@ class ListView(QTableView):
         if mime.hasFormat(ListView.MimeType):
             # Load data stored by application
             pickleData = pickle.loads(mime.data(ListView.MimeType))
-            print(pickleData)
             for progress, recordData in enumerate(pickleData):
                 if progressDlg:
                     progressDlg.setValue(progress)
