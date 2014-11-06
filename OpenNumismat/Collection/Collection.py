@@ -251,10 +251,12 @@ class CollectionModel(QSqlTableModel):
         record.setNull('id')  # remove ID value from record
         record.setValue('createdat', record.value('updatedat'))
 
-        if not record.isNull('image'):
+        record.remove(record.indexOf('image_id'))
+        image = record.value('image')
+        if image:
             query = QSqlQuery(self.database())
             query.prepare("INSERT INTO images (image) VALUES (?)")
-            query.addBindValue(record.value('image'))
+            query.addBindValue(image)
             query.exec_()
 
             img_id = query.lastInsertId()
@@ -264,12 +266,14 @@ class CollectionModel(QSqlTableModel):
 
         for i in range(4):
             field = "photo%d" % (i + 1)
-            if not record.isNull(field):
-                photo = record.value(field)
+            photo = record.value(field)
+            if not photo.isNull():
                 if photo.changed:
                     photo.save()
                 photo.image = QtGui.QImage()  # free image
                 record.setValue(field, photo.id_)
+            else:
+                record.setNull(field)
 
         return super(CollectionModel, self).insertRecord(row, record)
 
@@ -277,24 +281,26 @@ class CollectionModel(QSqlTableModel):
         self._updateRecord(record)
 
         img_id = record.value('image_id')
-        if not record.isNull('image'):
-            if record.isNull('image_id'):
+        record.remove(record.indexOf('image_id'))
+        image = record.value('image')
+        if image:
+            if img_id:
+                query = QSqlQuery(self.database())
+                query.prepare("UPDATE images SET image=? WHERE id=?")
+                query.addBindValue(image)
+                query.addBindValue(img_id)
+                query.exec_()
+            else:
                 query = QSqlQuery(self.database())
                 query.prepare("INSERT INTO images (image) VALUES (?)")
-                query.addBindValue(record.value('image'))
+                query.addBindValue(image)
                 query.exec_()
 
                 img_id = query.lastInsertId()
-            else:
-                query = QSqlQuery(self.database())
-                query.prepare("UPDATE images SET image=? WHERE id=?")
-                query.addBindValue(record.value('image'))
-                query.addBindValue(img_id)
-                query.exec_()
 
             record.setValue('image', img_id)
         else:
-            if not record.isNull('image_id'):
+            if img_id:
                 query = QSqlQuery(self.database())
                 query.prepare("DELETE FROM images WHERE id=?")
                 query.addBindValue(img_id)
@@ -304,12 +310,14 @@ class CollectionModel(QSqlTableModel):
 
         for i in range(4):
             field = "photo%d" % (i + 1)
-            if not record.isNull(field):
-                photo = record.value(field)
+            photo = record.value(field)
+            if not photo.isNull():
                 if photo.changed:
                     photo.save()
                 photo.image = QtGui.QImage()  # free image
                 record.setValue(field, photo.id_)
+            else:
+                record.setNull(field)
 
         return super(CollectionModel, self).setRecord(row, record)
 
@@ -320,8 +328,8 @@ class CollectionModel(QSqlTableModel):
             record = super(CollectionModel, self).record()
 
         record.append(QSqlField('image_id'))
-        if not record.isNull('image'):
-            img_id = record.value('image')
+        img_id = record.value('image')
+        if img_id:
             data = self.getImage(img_id)
             record.setValue('image', data)
             record.setValue('image_id', img_id)
@@ -338,16 +346,17 @@ class CollectionModel(QSqlTableModel):
     def removeRow(self, row):
         record = self.record(row)
 
-        if not record.isNull('image'):
+        img_id = record.value('image')
+        if img_id:
             query = QSqlQuery(self.database())
             query.prepare("DELETE FROM images WHERE id=?")
-            query.addBindValue(record.value('image'))
+            query.addBindValue(img_id)
             query.exec_()
 
         for i in range(4):
             field = "photo%d" % (i + 1)
-            if not record.isNull(field):
-                photo = record.value(field)
+            photo = record.value(field)
+            if photo:
                 photo.remove()
 
         return super(CollectionModel, self).removeRow(row)
