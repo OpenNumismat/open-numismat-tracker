@@ -105,25 +105,22 @@ class Photo(QtCore.QObject):
                 return file_name
 
         if Settings()['download_images']:
-            if self._uploadImage():
+            if self.uploadImage():
                 self.save()
                 return self._generateFileName(self.file)
 
         return None
 
-    def uploadImage(self):
+    def uploadMissedImage(self):
         if self.file:
             file_name = self._generateFileName(self.file)
             if os.path.exists(file_name):
-                return file_name
+                return
 
-        if self._uploadImage():
+        if self.uploadImage():
             self.save()
-            return self._generateFileName(self.file)
 
-        return None
-
-    def _uploadImage(self):
+    def uploadImage(self):
         if self.url:
             import urllib.request
             try:

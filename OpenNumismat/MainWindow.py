@@ -473,7 +473,7 @@ class MainWindow(QMainWindow):
                     break
 
                 photo = Photo(query.record().value('id'), model)
-                photo.uploadImage()
+                photo.uploadMissedImage()
 
             progressDlg.reset()
             query.clear()
@@ -550,10 +550,11 @@ class MainWindow(QMainWindow):
                                 if i < len(imageFields):
                                     photo = Photo(None, model)
                                     photo.url = imageUrl
-                                    # When error - repeat uploading
-                                    for _ in range(5):
-                                        if photo.uploadImage():
-                                            break
+                                    if dialog.params['download_images']:
+                                        # When error - repeat uploading
+                                        for _ in range(3):
+                                            if photo.uploadImage():
+                                                break
     
                                     photo.changed = True
                                     record_item[imageFields[i]] = photo
