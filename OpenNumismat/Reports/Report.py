@@ -167,24 +167,29 @@ class Report(QtCore.QObject):
             if records:
                 progressDlg.setLabelText(self.tr("Generating trend"))
 
-                points.sort(key=lambda tup: tup[0], reverse=True)
-                coefficients = numpy.polyfit([tup[0] for tup in points], [tup[1] for tup in points], 3)
-                polynomial = numpy.poly1d(coefficients)
-                min_x = points[0][0]  # min(x)
-                max_x = points[-1][0]
-                if min_x - max_x > 100:
-                    delimeter = 100
-                else:
-                    delimeter = min_x - max_x
-                xs = numpy.arange(min_x, max_x - 1, (max_x - min_x) / delimeter)
-                ys = polynomial(xs)
-
-                for i in range(len(xs)):
-                    date = start_date.addDays(-xs[i])
-                    point = {'date_js': '%d,%d,%d' % (date.year(), date.month() - 1, date.day()),
-                         'date': date.toString(Qt.SystemLocaleShortDate),
-                         'price_raw': numpy.round(ys[i]).astype(int)}
-                    trend.append(point)
+                try:
+                    points.sort(key=lambda tup: tup[0], reverse=True)
+                    coefficients = numpy.polyfit([tup[0] for tup in points], [tup[1] for tup in points], 3)
+                    polynomial = numpy.poly1d(coefficients)
+                    min_x = points[0][0]  # min(x)
+                    max_x = points[-1][0]
+                    if min_x == max_x:
+                        max_x += 1
+                    if min_x - max_x > 100:
+                        delimeter = 100
+                    else:
+                        delimeter = min_x - max_x
+                    xs = numpy.arange(min_x, max_x - 1, (max_x - min_x) / delimeter)
+                    ys = polynomial(xs)
+    
+                    for i in range(len(xs)):
+                        date = start_date.addDays(-xs[i])
+                        point = {'date_js': '%d,%d,%d' % (date.year(), date.month() - 1, date.day()),
+                             'date': date.toString(Qt.SystemLocaleShortDate),
+                             'price_raw': numpy.round(ys[i]).astype(int)}
+                        trend.append(point)
+                except Exception as err:
+                    print(err)
 
             self.mapping['records'] = record_data
             self.mapping['trend'] = trend
