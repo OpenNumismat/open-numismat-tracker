@@ -141,12 +141,16 @@ class AuctionSpbParser(_AuctionParser):
         return 'windows-1251'
 
     def pages(self, auctNo, category):
+        self.page_category = category
+
         page = 0
         while 1:
             yield page
             page = page + 20
 
     def getPageUrl(self, auctNo, category, page):
+        self.page_category = category
+
         params = urllib.parse.urlencode({'auctID': auctNo, 'catID': category+1, 'order': 'numblot', 'p': page})
         url = "http://auction.spb.ru/?%s" % params
         return url
@@ -204,6 +208,15 @@ class AuctionSpbParser(_AuctionParser):
             content = content[:-1]
         part = content.split('\xA0', 1)[-1]  # remove 'Лот № 8607'
         item['title'] = ' '.join(part.split())  # remove extra spaces
+        # Parse Country only for Foreign coins
+        if self.page_category == 6:
+            parts = part.split('.')
+            if len(parts) > 1:
+                country = parts[1]
+                for ch in ',0123456789':
+                    if ch in country:
+                        country = country.split(ch)[0]
+                item['country'] = country
 
 #        content = table.cssselect('strong')[1].text_content()
 #        grade = content.split()[1]

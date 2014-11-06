@@ -547,6 +547,8 @@ class MainWindow(QMainWindow):
                                     'site': 'Аукцион',
                                     'place': 'АукционЪ.СПб',
                             }
+                            if 'country' in item1:
+                                record_item['country'] = item1['country']
                             imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
                             for i, imageUrl in enumerate(item1['images']):
                                 if i < len(imageFields):
