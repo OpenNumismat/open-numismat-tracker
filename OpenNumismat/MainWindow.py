@@ -470,7 +470,7 @@ class MainWindow(QMainWindow):
                     break
 
                 photo = Photo(query.record().value('id'), model)
-                photo.fileName()
+                photo.uploadImage()
 
             progressDlg.reset()
             query.clear()

@@ -83,6 +83,7 @@ class Settings(BaseSettings):
                'error': False, 'updates': False,
                'free_numeric': False,
                'store_sorting': False,
+               'download_images': True,
                'template': 'FCoins',
                'ImageSideLen': 1024}
 
@@ -97,7 +98,7 @@ class Settings(BaseSettings):
     def _getValue(self, key):
         value = self.settings.value('mainwindow/' + key)
         if value:
-            if key in ('error', 'updates', 'free_numeric', 'store_sorting'):
+            if key in ('error', 'updates', 'free_numeric', 'store_sorting', 'download_images'):
                 # Convert boolean value
                 # TODO: From Qt 5.1 SQLite boolean type work correct
                 value = (value == 'true')
@@ -172,6 +173,11 @@ class MainSettingsPage(QWidget):
         self.checkUpdates.setChecked(settings['updates'])
         layout.addRow(self.checkUpdates)
 
+        self.downloadImages = QCheckBox(
+                            self.tr("Download images automatically"), self)
+        self.downloadImages.setChecked(settings['download_images'])
+        layout.addRow(self.downloadImages)
+
         self.imageSideLen = NumberEdit(self)
         self.imageSideLen.setMaximumWidth(60)
         layout.addRow(self.tr("Max image side len"), self.imageSideLen)
@@ -225,6 +231,7 @@ class MainSettingsPage(QWidget):
         settings['reference'] = self.reference.text()
         settings['error'] = self.errorSending.isChecked()
         settings['updates'] = self.checkUpdates.isChecked()
+        settings['download_images'] = self.downloadImages.isChecked()
         settings['free_numeric'] = self.freeNumeric.isChecked()
         settings['store_sorting'] = self.storeSorting.isChecked()
         settings['template'] = self.templateSelector.currentText()
