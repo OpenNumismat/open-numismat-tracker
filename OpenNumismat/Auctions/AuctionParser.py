@@ -164,7 +164,7 @@ class AuctionSpbParser(_AuctionParser):
             tds = tr.cssselect('td')
             if len(tds) >= 9:
                 url = hostname + tds[1].cssselect('a')[0].attrib['href']
-                denomination = str(tds[2].text_content())
+                denomination = str(tds[2].text_content()).strip()
                 year = str(tds[3].text_content())
                 mintmark = str(tds[4].text_content())
                 material = str(tds[5].text_content())
@@ -216,7 +216,7 @@ class AuctionSpbParser(_AuctionParser):
                 for ch in ',0123456789':
                     if ch in country:
                         country = country.split(ch)[0]
-                item['country'] = country
+                item['country'] = country.strip()
 
 #        content = table.cssselect('strong')[1].text_content()
 #        grade = content.split()[1]

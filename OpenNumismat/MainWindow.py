@@ -305,8 +305,7 @@ class MainWindow(QMainWindow):
     def newCollectionEvent(self):
         fileName, _selectedFilter = QFileDialog.getSaveFileName(self,
                 self.tr("New collection"), self.__workingDir(),
-                self.tr("Collections (*.db)"),
-                QFileDialog.DontConfirmOverwrite)
+                self.tr("Collections (*.db)"))
         if fileName:
             self.__saveParams()
 
