@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import urllib
 
@@ -16,6 +18,7 @@ from OpenNumismat.Tools.Gui import createIcon
 from OpenNumismat.Reports.Preview import PreviewDialog
 from OpenNumismat import version
 from OpenNumismat.Tools import Gui
+from OpenNumismat.ImportDialog import ImportDialog
 
 from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
 
@@ -32,7 +35,7 @@ class MainWindow(QMainWindow):
                                     self.tr("Settings..."), self)
         settingsAct.triggered.connect(self.settingsEvent)
 
-        importAct = QAction(self.tr("Import"), self)
+        importAct = QAction(self.tr("Import..."), self)
         importAct.triggered.connect(self.importEvent)
 
         uploadImagesAct = QAction(self.tr("Upload images"), self)
@@ -478,82 +481,84 @@ class MainWindow(QMainWindow):
     def importEvent(self):
         from PyQt5 import QtSql
         from OpenNumismat.Collection.Collection import Photo
-
-        model = self.collection.model()
-
-        parser = AuctionSpbParser()
-        categories = [3, ]
-        for auct in range(133):
-            auctNo = auct + 1
-
-            for category in categories:
-                url = parser.getPageUrl(auctNo, category, 0)
-                items = parser.parsePage(url)
-                if not items:
-                    continue
-
-                item1 = parser.parse(items[0]['url'])
-
-                query = QtSql.QSqlQuery(self.collection.db)
-                query.prepare("INSERT INTO auctions (number, date, site, place, category)" \
-                              " VALUES (?, ?, ?, ?, ?)")
-                query.addBindValue(auctNo)
-                query.addBindValue(item1['date'])
-                query.addBindValue('Аукцион')
-                query.addBindValue('АукционЪ.СПб')
-                query.addBindValue(parser.category(category))
-
-                query.exec_()
-
-                auct_id = query.lastInsertId()
-
-                for page in parser.pages(auctNo, category):
-                    url = parser.getPageUrl(auctNo, category, page)
+        
+        dialog = ImportDialog(self)
+        res = dialog.exec_()
+        if res == QDialog.Accepted:
+            model = self.collection.model()
+    
+            parser = AuctionSpbParser()
+            categories = [3, ]
+            for auctNo in range(dialog.params['from_num'], dialog.params['till_num']+1):
+    
+                for category in categories:
+                    url = parser.getPageUrl(auctNo, category, 0)
                     items = parser.parsePage(url)
-                    print(len(items))
                     if not items:
-                        break
-
-                    for item in items:
-                        item1 = parser.parse(item['url'])
-
-                        record_item = {
-                                'title': item1['title'],
-                                'denomination': item['denomination'],
-                                'year': item['year'],
-                                'mintmark': item['mintmark'],
-                                'category': parser.category(category),
-                                'status': 'pass',
-                                'material': item['material'],
-                                'grade': item['grade'],
-                                'price': item['price'],
-                                'totalpayprice': item['totalPayPrice'],
-                                'totalsaleprice': item['totalSalePrice'],
-                                'buyer': item['buyer'],
-                                'url': item['url'],
-                                'bids': item['bids'],
-                                'bidders': item1['bidders'],
-                                'date': item1['date'],
-                                'lotnum': item1['lotnum'],
-                                'auctionnum': auctNo,
-                                'site': 'Аукцион',
-                                'place': 'АукционЪ.СПб',
-                                'category': parser.category(category),
-                        }
-                        imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
-                        for i, imageUrl in enumerate(item1['images']):
-                            if i < len(imageFields):
-                                photo = Photo(None, model)
-                                photo.url = imageUrl
-                                # When error - repeat uploading
-                                for _ in range(5):
-                                    if photo.uploadImage():
-                                        break
-
-                                photo.changed = True
-                                record_item[imageFields[i]] = photo
-
-                        record = model.record()
-                        for field, value in record_item.items():
-                            record.setValue(field, value)
-                        model.appendRecordQuiet(record)
+                        continue
+    
+                    item1 = parser.parse(items[0]['url'])
+    
+                    query = QtSql.QSqlQuery(self.collection.db)
+                    query.prepare("INSERT INTO auctions (number, date, site, place, category)" \
+                                  " VALUES (?, ?, ?, ?, ?)")
+                    query.addBindValue(auctNo)
+                    query.addBindValue(item1['date'])
+                    query.addBindValue('Аукцион')
+                    query.addBindValue('АукционЪ.СПб')
+                    query.addBindValue(parser.category(category))
+    
+                    query.exec_()
+    
+                    auct_id = query.lastInsertId()
+    
+                    for page in parser.pages(auctNo, category):
+                        url = parser.getPageUrl(auctNo, category, page)
+                        items = parser.parsePage(url)
+                        print(len(items))
+                        if not items:
+                            break
+    
+                        for item in items:
+                            item1 = parser.parse(item['url'])
+    
+                            record_item = {
+                                    'title': item1['title'],
+                                    'denomination': item['denomination'],
+                                    'year': item['year'],
+                                    'mintmark': item['mintmark'],
+                                    'category': parser.category(category),
+                                    'status': 'pass',
+                                    'material': item['material'],
+                                    'grade': item['grade'],
+                                    'price': item['price'],
+                                    'totalpayprice': item['totalPayPrice'],
+                                    'totalsaleprice': item['totalSalePrice'],
+                                    'buyer': item['buyer'],
+                                    'url': item['url'],
+                                    'bids': item['bids'],
+                                    'bidders': item1['bidders'],
+                                    'date': item1['date'],
+                                    'lotnum': item1['lotnum'],
+                                    'auctionnum': auctNo,
+                                    'site': 'Аукцион',
+                                    'place': 'АукционЪ.СПб',
+                                    'category': parser.category(category),
+                            }
+                            imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
+                            for i, imageUrl in enumerate(item1['images']):
+                                if i < len(imageFields):
+                                    photo = Photo(None, model)
+                                    photo.url = imageUrl
+                                    # When error - repeat uploading
+                                    for _ in range(5):
+                                        if photo.uploadImage():
+                                            break
+    
+                                    photo.changed = True
+                                    record_item[imageFields[i]] = photo
+    
+                            record = model.record()
+                            for field, value in record_item.items():
+                                record.setValue(field, value)
+                            model.appendRecordQuiet(record)
