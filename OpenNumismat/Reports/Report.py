@@ -173,8 +173,6 @@ class Report(QtCore.QObject):
                     polynomial = numpy.poly1d(coefficients)
                     min_x = points[0][0]  # min(x)
                     max_x = points[-1][0]
-                    if min_x == max_x:
-                        max_x += 1
                     if min_x - max_x > 100:
                         delimeter = 100
                     else:
