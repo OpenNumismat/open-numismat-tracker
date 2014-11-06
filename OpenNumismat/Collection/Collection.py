@@ -578,7 +578,6 @@ class Collection(QtCore.QObject):
             if result == QDialog.Rejected:
                 return False
 
-        print(fileName)
         self.fields = CollectionFields(self.db)
 
         updateCollection(self)
