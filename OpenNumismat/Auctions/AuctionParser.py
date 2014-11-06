@@ -420,7 +420,7 @@ class WolmarParser(_AuctionParser):
 
 
 def _stringToGrade(string):
-    # Parse VF-XF and XF/AU
+    # Parse VF-XF, XF/AU and XF-
     grade = ''
     for c in string:
         if c in '-+/':

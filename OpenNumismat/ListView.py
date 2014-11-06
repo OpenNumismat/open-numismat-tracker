@@ -16,6 +16,7 @@ from OpenNumismat.Reports.Report import Report
 from OpenNumismat.Settings import Settings
 from OpenNumismat.Reports.ExportList import ExportToExcel, ExportToHtml, ExportToCsv, ExportToCsvUtf8
 from OpenNumismat.Tools.Gui import createIcon
+from OpenNumismat.Collection.Collection import Photo
 
 
 def textToClipboard(text):
@@ -589,6 +590,13 @@ class ListView(QTableView):
                 elif isinstance(value, QtCore.QByteArray):
                     textRecordData.append('')
                     pickleRecordData.append(value.data())
+                elif isinstance(value, Photo):
+                    if value.url:
+                        textRecordData.append(value.url)
+                    else:
+                        textRecordData.append('')
+                    pickleRecordData.append(value.file)
+                    pickleRecordData.append(value.url)
                 else:
                     textRecordData.append(textToClipboard(str(value)))
                     pickleRecordData.append(value)
@@ -609,6 +617,13 @@ class ListView(QTableView):
             dialog.setManyCoins()
         result = dialog.exec_()
         if result == QDialog.Accepted:
+            for i in range(4):
+                field = "photo%d" % (i + 1)
+                photo = record.value(field)
+                if not photo.isNull():
+                    photo.changed = True
+                photo.file = None
+                
             self.model().appendRecord(record)
 
         return dialog.clickedButton
@@ -621,6 +636,7 @@ class ListView(QTableView):
         if mime.hasFormat(ListView.MimeType):
             # Load data stored by application
             pickleData = pickle.loads(mime.data(ListView.MimeType))
+            print(pickleData)
             for progress, recordData in enumerate(pickleData):
                 if progressDlg:
                     progressDlg.setValue(progress)
@@ -634,9 +650,25 @@ class ListView(QTableView):
                         # str type
                         record.setValue(i, QtCore.QByteArray(recordData[i]))
                     else:
-                        record.setValue(i, recordData[i])
+                        if i in [33, 34, 35, 36]:
+                            photo = Photo(None, self.model())
+                            photo.file = recordData[i+(i-33)]
+                            photo.image.load(photo.fileName())
+                            photo.url = recordData[i+(i-33)+1]
+                            record.setValue(i, photo)
+                        elif i in [37, 38]:
+                            record.setValue(i, recordData[i+4])
+                        else:
+                            record.setValue(i, recordData[i])
 
                 if progressDlg:
+                    for i in range(4):
+                        field = "photo%d" % (i + 1)
+                        photo = record.value(field)
+                        if not photo.isNull():
+                            photo.changed = True
+                        photo.file = None
+                        
                     self.model().appendRecord(record)
                 else:
                     btn = self.__insertCoin(record, len(pickleData) - progress)
