@@ -33,8 +33,12 @@ class _AuctionParser(QtCore.QObject):
 
         self.html = ''
 
-    def category(self, cat):
+    @staticmethod
+    def categories(self):
         return []
+
+    def category(self, cat):
+        return self.categories()[cat]
 
     def pages(self, auctNo, category):
         raise NotImplementedError

@@ -114,20 +114,8 @@ class MolotokParser(_AuctionParser):
 
 class AuctionSpbParser(_AuctionParser):
     HostNames = ('www.auction.spb.ru', 'auction.spb.ru')
-
-    @staticmethod
-    def verifyDomain(url):
-        return (urllib.parse.urlparse(url).hostname in AuctionSpbParser.HostNames)
-
-    def __init__(self, parent=None):
-        super(AuctionSpbParser, self).__init__(parent)
-
-    def _encoding(self):
-        return 'windows-1251'
-
-    def category(self, cat):
-        categories = [
-            "Все категории",
+    Categories = [
+#            "Все категории",
             "Монеты России до 1917 года (золото, серебро)",
             "Монеты России до 1917 года (медь)",
             "Монеты РСФСР, СССР, России",
@@ -138,7 +126,19 @@ class AuctionSpbParser(_AuctionParser):
             "Награды, медали, знаки, жетоны, пряжки и т.д.",
         ]
 
-        return categories[cat]
+    @staticmethod
+    def verifyDomain(url):
+        return (urllib.parse.urlparse(url).hostname in AuctionSpbParser.HostNames)
+
+    @staticmethod
+    def categories():
+        return AuctionSpbParser.Categories
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def _encoding(self):
+        return 'windows-1251'
 
     def pages(self, auctNo, category):
         page = 0
@@ -147,7 +147,7 @@ class AuctionSpbParser(_AuctionParser):
             page = page + 20
 
     def getPageUrl(self, auctNo, category, page):
-        params = urllib.parse.urlencode({'auctID': auctNo, 'catID': category, 'order': 'numblot', 'p': page})
+        params = urllib.parse.urlencode({'auctID': auctNo, 'catID': category+1, 'order': 'numblot', 'p': page})
         url = "http://auction.spb.ru/?%s" % params
         return url
 

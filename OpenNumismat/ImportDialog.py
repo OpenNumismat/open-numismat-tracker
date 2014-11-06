@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 
-import OpenNumismat
-from OpenNumismat.Tools.DialogDecorators import storeDlgSizeDecorator
 from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
 
-#@storeDlgSizeDecorator
 class ImportDialog(QDialog):
     params = {}
     
@@ -29,7 +25,8 @@ class ImportDialog(QDialog):
         form.addRow(self.tr("Auction"), self.auctionSelector)
 
         self.categorySelector = QComboBox(self)
-        for cat in [AuctionSpbParser().category(3)]:
+        self.categorySelector.addItem(self.tr("All categories"))
+        for cat in AuctionSpbParser.categories():
             self.categorySelector.addItem(cat)
         self.categorySelector.setSizePolicy(QSizePolicy.Fixed,
                                             QSizePolicy.Fixed)
@@ -72,4 +69,5 @@ class ImportDialog(QDialog):
         self.params['download_images'] = self.downloadImages.isChecked()
         self.params['from_num'] = self.fromNum.value()
         self.params['till_num'] = self.tillNum.value()
+        self.params['category'] = self.categorySelector.currentIndex()
         self.accept()

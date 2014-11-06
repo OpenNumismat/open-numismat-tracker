@@ -488,9 +488,12 @@ class MainWindow(QMainWindow):
             model = self.collection.model()
     
             parser = AuctionSpbParser()
-            categories = [3, ]
+            if dialog.params['category'] == 0:
+                categories = range(len(parser.categories()))
+            else:
+                categories = [dialog.params['category']-1, ]
+
             for auctNo in range(dialog.params['from_num'], dialog.params['till_num']+1):
-    
                 for category in categories:
                     url = parser.getPageUrl(auctNo, category, 0)
                     items = parser.parsePage(url)
@@ -543,7 +546,6 @@ class MainWindow(QMainWindow):
                                     'auctionnum': auctNo,
                                     'site': 'Аукцион',
                                     'place': 'АукционЪ.СПб',
-                                    'category': parser.category(category),
                             }
                             imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
                             for i, imageUrl in enumerate(item1['images']):
