@@ -1,6 +1,6 @@
-from PyQt4 import QtGui
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.EditCoinDialog.FormItems import DoubleValidator
 from OpenNumismat.EditCoinDialog.BaseFormLayout import BaseFormLayout, BaseFormGroupBox, ImageFormLayout
@@ -9,8 +9,8 @@ from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
 from OpenNumismat.Tools.Converters import stringToMoney
 
 
-class DetailsTabWidget(QtGui.QTabWidget):
-    Direction = QtGui.QBoxLayout.LeftToRight
+class DetailsTabWidget(QTabWidget):
+    Direction = QBoxLayout.LeftToRight
     Stretch = 'stretch item'
 
     def __init__(self, model, parent=None):
@@ -50,7 +50,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
                                 variation])
 
     def _layoutToWidget(self, layout):
-        widget = QtGui.QWidget(self)
+        widget = QWidget(self)
         widget.setLayout(layout)
         return widget
 
@@ -61,9 +61,9 @@ class DetailsTabWidget(QtGui.QTabWidget):
                 if part.isEmpty():
                     parts.remove(part)
 
-        if self.Direction == QtGui.QBoxLayout.LeftToRight:
+        if self.Direction == QBoxLayout.LeftToRight:
             newParts = []
-            layout = QtGui.QVBoxLayout()
+            layout = QVBoxLayout()
             stretchNeeded = True
             count = 0
             for part in parts:
@@ -72,13 +72,13 @@ class DetailsTabWidget(QtGui.QTabWidget):
                         newParts.append(layout)
                         if stretchNeeded:
                             layout.insertStretch(-1)
-                        layout = QtGui.QVBoxLayout()
+                        layout = QVBoxLayout()
                     stretchNeeded = True
                     count = 0
                 else:
-                    if isinstance(part, QtGui.QWidget):
+                    if isinstance(part, QWidget):
                         layout.addWidget(part)
-                        if part.sizePolicy().verticalPolicy() == QtGui.QSizePolicy.Preferred:
+                        if part.sizePolicy().verticalPolicy() == QSizePolicy.Preferred:
                             stretchNeeded = False
                     else:
                         layout.addLayout(part)
@@ -93,20 +93,20 @@ class DetailsTabWidget(QtGui.QTabWidget):
                 if part == self.Stretch:
                     parts.remove(part)
 
-        pageLayout = QtGui.QBoxLayout(self.Direction, self)
+        pageLayout = QBoxLayout(self.Direction, self)
         # Fill layout with it's parts
         stretchNeeded = True
         for part in parts:
-            if isinstance(part, QtGui.QWidget):
+            if isinstance(part, QWidget):
                 pageLayout.addWidget(part)
-                if part.sizePolicy().verticalPolicy() == QtGui.QSizePolicy.Preferred:
+                if part.sizePolicy().verticalPolicy() == QSizePolicy.Preferred:
                     stretchNeeded = False
             else:
                 pageLayout.addLayout(part)
                 if isinstance(part, ImageFormLayout):
                     stretchNeeded = False
 
-        if self.Direction == QtGui.QBoxLayout.TopToBottom and stretchNeeded:
+        if self.Direction == QBoxLayout.TopToBottom and stretchNeeded:
             pageLayout.insertStretch(-1)
 
         return self._layoutToWidget(pageLayout)
@@ -234,9 +234,9 @@ class DetailsTabWidget(QtGui.QTabWidget):
         item = self.items['rarity']
         layout.addWidget(item.label(), 1, 0)
         layout.addWidget(item.widget(), 1, 1)
-        layout.addWidget(QtGui.QWidget(), 1, 2)
-        item.widget().setSizePolicy(QtGui.QSizePolicy.Preferred,
-                                    QtGui.QSizePolicy.Fixed)
+        layout.addWidget(QWidget(), 1, 2)
+        item.widget().setSizePolicy(QSizePolicy.Preferred,
+                                    QSizePolicy.Fixed)
 
         return layout
 
@@ -286,7 +286,7 @@ class DetailsTabWidget(QtGui.QTabWidget):
 
 
 class FormDetailsTabWidget(DetailsTabWidget):
-    Direction = QtGui.QBoxLayout.TopToBottom
+    Direction = QBoxLayout.TopToBottom
 
     def __init__(self, model, parent=None, usedFields=None):
         self.usedFields = usedFields

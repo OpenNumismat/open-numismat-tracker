@@ -1,7 +1,8 @@
 import sys
 import urllib
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.Collection.Collection import Collection
 from OpenNumismat.Collection.Description import DescriptionDialog
@@ -19,29 +20,29 @@ from OpenNumismat.Tools import Gui
 from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
 
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
+        QMainWindow.__init__(self)
 
         self.setWindowIcon(createIcon('main.ico'))
 
         self.createStatusBar()
 
-        settingsAct = QtGui.QAction(createIcon('cog.png'),
+        settingsAct = QAction(createIcon('cog.png'),
                                     self.tr("Settings..."), self)
         settingsAct.triggered.connect(self.settingsEvent)
 
-        importAct = QtGui.QAction(self.tr("Import"), self)
+        importAct = QAction(self.tr("Import"), self)
         importAct.triggered.connect(self.importEvent)
 
-        uploadImagesAct = QtGui.QAction(self.tr("Upload images"), self)
+        uploadImagesAct = QAction(self.tr("Upload images"), self)
         uploadImagesAct.triggered.connect(self.uploadImagesEvent)
 
-        cancelFilteringAct = QtGui.QAction(createIcon('funnel.png'),
+        cancelFilteringAct = QAction(createIcon('funnel.png'),
                                     self.tr("Clear all filters"), self)
         cancelFilteringAct.triggered.connect(self.cancelFilteringEvent)
 
-        exitAct = QtGui.QAction(createIcon('door_in.png'),
+        exitAct = QAction(createIcon('door_in.png'),
                                 self.tr("E&xit"), self)
         exitAct.setShortcut(QtGui.QKeySequence.Quit)
         exitAct.triggered.connect(self.close)
@@ -55,18 +56,18 @@ class MainWindow(QtGui.QMainWindow):
         file.addSeparator()
         file.addAction(exitAct)
 
-        addCoinAct = QtGui.QAction(createIcon('add.png'),
+        addCoinAct = QAction(createIcon('add.png'),
                                    self.tr("Add"), self)
         addCoinAct.setShortcut('Insert')
         addCoinAct.triggered.connect(self.addCoin)
 
-        editCoinAct = QtGui.QAction(createIcon('pencil.png'),
+        editCoinAct = QAction(createIcon('pencil.png'),
                                    self.tr("Edit..."), self)
         editCoinAct.triggered.connect(self.editCoin)
 
-        style = QtGui.QApplication.style()
-        icon = style.standardIcon(QtGui.QStyle.SP_TrashIcon)
-        deleteCoinAct = QtGui.QAction(icon,
+        style = QApplication.style()
+        icon = style.standardIcon(QStyle.SP_TrashIcon)
+        deleteCoinAct = QAction(icon,
                                    self.tr("Delete"), self)
         deleteCoinAct.setShortcut(QtGui.QKeySequence.Delete)
         deleteCoinAct.triggered.connect(self.deleteCoin)
@@ -76,34 +77,34 @@ class MainWindow(QtGui.QMainWindow):
         coin.addAction(editCoinAct)
         coin.addAction(deleteCoinAct)
 
-        viewBrowserAct = QtGui.QAction(createIcon('page_white_world.png'),
+        viewBrowserAct = QAction(createIcon('page_white_world.png'),
                                    self.tr("View in browser"), self)
         viewBrowserAct.triggered.connect(self.viewBrowser)
 
-        newCollectionAct = QtGui.QAction(self.tr("&New..."), self)
+        newCollectionAct = QAction(self.tr("&New..."), self)
         newCollectionAct.triggered.connect(self.newCollectionEvent)
 
-        style = QtGui.QApplication.style()
-        icon = style.standardIcon(QtGui.QStyle.SP_DialogOpenButton)
-        openCollectionAct = QtGui.QAction(icon, self.tr("&Open..."), self)
+        style = QApplication.style()
+        icon = style.standardIcon(QStyle.SP_DialogOpenButton)
+        openCollectionAct = QAction(icon, self.tr("&Open..."), self)
         openCollectionAct.setShortcut(QtGui.QKeySequence.Open)
         openCollectionAct.triggered.connect(self.openCollectionEvent)
 
-        backupCollectionAct = QtGui.QAction(
+        backupCollectionAct = QAction(
                                     createIcon('database_backup.png'),
                                     self.tr("Backup"), self)
         backupCollectionAct.triggered.connect(self.backupCollectionEvent)
 
-        vacuumCollectionAct = QtGui.QAction(
+        vacuumCollectionAct = QAction(
                                     createIcon('compress.png'),
                                     self.tr("Vacuum"), self)
         vacuumCollectionAct.triggered.connect(self.vacuumCollectionEvent)
 
-        descriptionCollectionAct = QtGui.QAction(self.tr("Description"), self)
+        descriptionCollectionAct = QAction(self.tr("Description"), self)
         descriptionCollectionAct.triggered.connect(
                                             self.descriptionCollectionEvent)
 
-        passwordCollectionAct = QtGui.QAction(createIcon('key.png'),
+        passwordCollectionAct = QAction(createIcon('key.png'),
                                               self.tr("Set password..."), self)
         passwordCollectionAct.triggered.connect(self.passwordCollectionEvent)
 
@@ -135,11 +136,11 @@ class MainWindow(QtGui.QMainWindow):
 
         self.referenceMenu = menubar.addMenu(self.tr("Reference"))
 
-        reportAct = QtGui.QAction(self.tr("Report..."), self)
+        reportAct = QAction(self.tr("Report..."), self)
         reportAct.setShortcut(QtCore.Qt.CTRL + QtCore.Qt.Key_P)
         reportAct.triggered.connect(self.report)
 
-        saveTableAct = QtGui.QAction(createIcon('table.png'),
+        saveTableAct = QAction(createIcon('table.png'),
                                      self.tr("Save current list..."), self)
         saveTableAct.triggered.connect(self.saveTable)
 
@@ -148,13 +149,13 @@ class MainWindow(QtGui.QMainWindow):
         report.addAction(saveTableAct)
         report.addAction(viewBrowserAct)
 
-        helpAct = QtGui.QAction(createIcon('help.png'),
+        helpAct = QAction(createIcon('help.png'),
                                 self.tr("Online help"), self)
         helpAct.setShortcut(QtGui.QKeySequence.HelpContents)
         helpAct.triggered.connect(self.onlineHelp)
-        checkUpdatesAct = QtGui.QAction(self.tr("Check for updates"), self)
+        checkUpdatesAct = QAction(self.tr("Check for updates"), self)
         checkUpdatesAct.triggered.connect(self.manualUpdate)
-        aboutAct = QtGui.QAction(self.tr("About %s") % version.AppName, self)
+        aboutAct = QAction(self.tr("About %s") % version.AppName, self)
         aboutAct.triggered.connect(self.about)
 
         help_ = menubar.addMenu(self.tr("&Help"))
@@ -164,7 +165,7 @@ class MainWindow(QtGui.QMainWindow):
         help_.addSeparator()
         help_.addAction(aboutAct)
 
-        toolBar = QtGui.QToolBar(self.tr("Toolbar"), self)
+        toolBar = QToolBar(self.tr("Toolbar"), self)
         toolBar.setMovable(False)
         toolBar.addAction(addCoinAct)
         toolBar.addAction(editCoinAct)
@@ -206,7 +207,7 @@ class MainWindow(QtGui.QMainWindow):
         self.autoUpdate()
 
     def createStatusBar(self):
-        self.collectionFileLabel = QtGui.QLabel()
+        self.collectionFileLabel = QLabel()
         self.statusBar().addWidget(self.collectionFileLabel)
 
     def __updateLatest(self, menu=None):
@@ -229,16 +230,16 @@ class MainWindow(QtGui.QMainWindow):
     def settingsEvent(self):
         dialog = SettingsDialog(self.collection, self)
         res = dialog.exec_()
-        if res == QtGui.QDialog.Accepted:
+        if res == QDialog.Accepted:
             self.__restart()
 
     def __restart(self):
-        result = QtGui.QMessageBox.question(self, self.tr("Settings"),
+        result = QMessageBox.question(self, self.tr("Settings"),
                     self.tr("The application will need to restart to apply "
                             "the new settings. Restart it now?"),
-                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                    QtGui.QMessageBox.Yes)
-        if result == QtGui.QMessageBox.Yes:
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes)
+        if result == QMessageBox.Yes:
             self.close()
             program = sys.executable
             argv = []
@@ -292,17 +293,17 @@ class MainWindow(QtGui.QMainWindow):
         return QtCore.QFileInfo(fileName).absolutePath()
 
     def openCollectionEvent(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,
+        fileName, _selectedFilter = QFileDialog.getOpenFileName(self,
                 self.tr("Open collection"), self.__workingDir(),
                 self.tr("Collections (*.db)"))
         if fileName:
             self.openCollection(fileName)
 
     def newCollectionEvent(self):
-        fileName = QtGui.QFileDialog.getSaveFileName(self,
+        fileName, _selectedFilter = QFileDialog.getSaveFileName(self,
                 self.tr("New collection"), self.__workingDir(),
                 self.tr("Collections (*.db)"),
-                QtGui.QFileDialog.DontConfirmOverwrite)
+                QFileDialog.DontConfirmOverwrite)
         if fileName:
             self.__saveParams()
 
@@ -373,7 +374,7 @@ class MainWindow(QtGui.QMainWindow):
                 param.listParam.save()
 
     def about(self):
-        QtGui.QMessageBox.about(self, self.tr("About %s") % version.AppName,
+        QMessageBox.about(self, self.tr("About %s") % version.AppName,
                 self.tr("%s %s\n\n"
                         "Copyright (C) 2013 Vitaly Ignatov\n\n"
                         "%s is freeware licensed under a GPLv3.") %
@@ -401,7 +402,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def manualUpdate(self):
         if not self.checkUpdates():
-            QtGui.QMessageBox.information(self, self.tr("Updates"),
+            QMessageBox.information(self, self.tr("Updates"),
                     self.tr("You already have the latest version."))
 
     def checkUpdates(self):
@@ -412,11 +413,11 @@ class MainWindow(QtGui.QMainWindow):
 
         newVersion = self.__getNewVersion()
         if newVersion and newVersion != version.Version:
-            result = QtGui.QMessageBox.question(self, self.tr("New version"),
+            result = QMessageBox.question(self, self.tr("New version"),
                         self.tr("New version is available. Download it now?"),
-                        QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                        QtGui.QMessageBox.Yes)
-            if result == QtGui.QMessageBox.Yes:
+                        QMessageBox.Yes | QMessageBox.No,
+                        QMessageBox.Yes)
+            if result == QMessageBox.Yes:
                 url = QtCore.QUrl(version.Web + 'wiki/MainPage')
 
                 executor = QtGui.QDesktopServices()
@@ -446,7 +447,7 @@ class MainWindow(QtGui.QMainWindow):
         return newVersion
 
     def uploadImagesEvent(self):
-        from PyQt4 import QtSql
+        from PyQt5 import QtSql
         from OpenNumismat.Collection.Collection import Photo
 
         model = self.collection.model()
@@ -475,7 +476,7 @@ class MainWindow(QtGui.QMainWindow):
             query.clear()
 
     def importEvent(self):
-        from PyQt4 import QtSql
+        from PyQt5 import QtSql
         from OpenNumismat.Collection.Collection import Photo
 
         model = self.collection.model()

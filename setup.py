@@ -47,7 +47,7 @@ from OpenNumismat import version
 
 # This modules can't be easy installed
 # Syntax: [(module, url of the tutorial)...]
-NEEDED_MODULES = [("PyQt4",
+NEEDED_MODULES = [("PyQt5",
         "http://www.riverbankcomputing.co.uk/software/pyqt/intro"), ]
 if sys.platform == 'win32':
     NEEDED_MODULES.append(('win32com',
@@ -62,7 +62,7 @@ for mn, urlm in NEEDED_MODULES:
         sys.exit(1)
 
 
-dependencies = ['lxml', 'jinja2']
+dependencies = ['lxml', 'jinja2', 'numpy']
 if sys.platform == 'win32':
     dependencies.append("xlwt3")
 
@@ -94,13 +94,10 @@ params = {
     "url": version.Web,
     "license": "GPLv3",
     "keywords": "numismatics, coins, qt, pyqt, collecting, cataloging",
-    "classifiers": ["Development Status :: 5 - Production/Stable",
+    "classifiers": ["Development Status :: 4 - Beta",
             "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
             "Natural Language :: English",
             "Natural Language :: Russian",
-            "Natural Language :: Spanish",
-            "Natural Language :: Ukranian",
-            "Natural Language :: Hungarian",
             "Intended Audience :: End Users/Desktop",
             "Operating System :: OS Independent",
             "Operating System :: POSIX :: Linux",
@@ -109,7 +106,7 @@ params = {
             "Environment :: X11 Applications :: Qt",
             "Environment :: Win32 (MS Windows)",
             "Environment :: MacOS X",
-            "Programming Language :: Python :: 3.3"],
+            "Programming Language :: Python :: 3.4"],
 
     "install_requires": dependencies,
 
@@ -138,18 +135,18 @@ params = {
 }
 
 if cx_Freeze_available:
-    import PyQt4
+    import PyQt5
 
     base = None
     if sys.platform == "win32":
         base = "Win32GUI"
 
     if sys.platform == "win32":
-        qt_dir = PyQt4.__path__[0]
+        qt_dir = PyQt5.__path__[0]
         executable_ext = '.exe'
     else:
         # Path to Qt on MacPorts
-        qt_dir = '/opt/local/share/qt4'
+        qt_dir = '/opt/local/share/qt5'
         executable_ext = ''
 
     executable = Executable("open-numismat.py", base=base, compress=True,
@@ -171,7 +168,7 @@ if cx_Freeze_available:
         ]
     if sys.platform == "win32":
         include_files.append(
-                (qt_dir + "/plugins/sqldrivers/qsqlite4.dll", "sqldrivers/qsqlite4.dll"))
+                (qt_dir + "/plugins/sqldrivers/qsqlite.dll", "sqldrivers/qsqlite.dll"))
     elif sys.platform == "darwin":
         include_files.append(
                 (qt_dir + "/plugins/sqldrivers/libqsqlite.dylib", "sqldrivers/libqsqlite.dylib"))
@@ -183,7 +180,7 @@ if cx_Freeze_available:
         include_files.append(("/opt/local/lib/liblcms.1.dylib", "liblcms.1.dylib"))
     build_exe_options = {
             "excludes": ["unittest"],
-            "includes": ["lxml._elementpath", "gzip", "inspect", "PyQt4.QtNetwork"],
+            "includes": ["lxml._elementpath", "gzip", "inspect", "PyQt5.QtNetwork", "PyQt5.QtWebKit"],
             "include_files": include_files,
             "replace_paths": [(os.path.dirname(__file__) + os.sep, '')]
     }

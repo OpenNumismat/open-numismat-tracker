@@ -1,6 +1,6 @@
 Requirement:
  * Python 3.3.1
- * PyQt4 4.10
+ * PyQt5 4.10
  * Jinja2 2.6 (for reports)
  * lxml 3.1.2 (for auction parsing) [http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml]
  * cssselect 0.8

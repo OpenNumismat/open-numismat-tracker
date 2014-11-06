@@ -1,11 +1,12 @@
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QAction
 
 import OpenNumismat
 from OpenNumismat.Collection.Collection import Collection
 
 
-class LatestCollectionAction(QtGui.QAction):
+class LatestCollectionAction(QAction):
     latestTriggered = pyqtSignal(str)
 
     def __init__(self, key, parent=None):

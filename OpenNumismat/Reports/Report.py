@@ -13,8 +13,8 @@ try:
 except ImportError:
     print('numpy module missed. Trend functionality not available')
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt
 
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
 from OpenNumismat.Tools import Gui
@@ -216,7 +216,7 @@ class Report(QtCore.QObject):
         record_mapping['price_raw'] = ''
         for field in self.model.fields:
             value = record.value(field.name)
-            if value is None or value == '' or isinstance(value, QtCore.QPyNullVariant):
+            if value is None or value == '':
                 record_mapping[field.name] = ''
             else:
                 if field.name in imgFields:

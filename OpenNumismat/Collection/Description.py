@@ -1,6 +1,7 @@
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
-from PyQt4.QtSql import QSqlQuery
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt
+from PyQt5.QtSql import QSqlQuery
+from PyQt5.QtWidgets import *
 
 
 class CollectionDescription(QtCore.QObject):
@@ -53,34 +54,34 @@ class CollectionDescription(QtCore.QObject):
         self.db.commit()
 
 
-class DescriptionDialog(QtGui.QDialog):
+class DescriptionDialog(QDialog):
     def __init__(self, description, parent=None):
-        super(DescriptionDialog, self).__init__(parent,
-                                                Qt.WindowSystemMenuHint)
+        super().__init__(parent,
+                         Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint)
 
         self.description = description
 
         self.setWindowTitle(self.tr("Description"))
 
-        mainLayout = QtGui.QFormLayout()
+        mainLayout = QFormLayout()
 
-        self.titleWidget = QtGui.QLineEdit(self.description.title, self)
+        self.titleWidget = QLineEdit(self.description.title, self)
         mainLayout.addRow(self.tr("Title"), self.titleWidget)
-        self.descriptionWidget = QtGui.QTextEdit(self)
+        self.descriptionWidget = QTextEdit(self)
         self.descriptionWidget.setText(self.description.description)
         self.descriptionWidget.setAcceptRichText(False)
         self.descriptionWidget.setTabChangesFocus(True)
         mainLayout.addRow(self.tr("Description"), self.descriptionWidget)
-        self.authorWidget = QtGui.QLineEdit(self.description.author, self)
+        self.authorWidget = QLineEdit(self.description.author, self)
         mainLayout.addRow(self.tr("Author"), self.authorWidget)
 
-        buttonBox = QtGui.QDialogButtonBox(Qt.Horizontal)
-        buttonBox.addButton(QtGui.QDialogButtonBox.Ok)
-        buttonBox.addButton(QtGui.QDialogButtonBox.Cancel)
+        buttonBox = QDialogButtonBox(Qt.Horizontal)
+        buttonBox.addButton(QDialogButtonBox.Ok)
+        buttonBox.addButton(QDialogButtonBox.Cancel)
         buttonBox.accepted.connect(self.save)
         buttonBox.rejected.connect(self.reject)
 
-        layout = QtGui.QVBoxLayout(self)
+        layout = QVBoxLayout(self)
         layout.addLayout(mainLayout)
         layout.addWidget(buttonBox)
 

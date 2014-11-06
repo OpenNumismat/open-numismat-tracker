@@ -2,9 +2,10 @@ import locale
 import os
 import uuid
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery, QSqlField
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery, QSqlField
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
 from OpenNumismat.Collection.CollectionFields import CollectionFields
@@ -218,7 +219,7 @@ class CollectionModel(QSqlTableModel):
         record.setNull('id')  # remove ID value from record
         dialog = EditCoinDialog(self, record, parent)
         result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        if result == QDialog.Accepted:
             self.appendRecord(record)
 
     def appendRecord(self, record):
@@ -351,7 +352,7 @@ class CollectionModel(QSqlTableModel):
 #        for field in self.fields.userFields:
 #            if field.type == Type.Photo:
 #                data = record.value(field.name)
-#                if isinstance(data, QtGui.QImage):
+#                if isinstance(data, QImage):
 #                    ba = QtCore.QByteArray()
 #                    buffer = QtCore.QBuffer(ba)
 #                    buffer.open(QtCore.QIODevice.WriteOnly)
@@ -384,7 +385,7 @@ class CollectionModel(QSqlTableModel):
             pass
         else:
             # Get height of list view for resizing images
-            tmp = QtGui.QTableView()
+            tmp = QTableView()
             height = int(tmp.verticalHeader().defaultSectionSize() * 1.5 - 1)
 
             if not record.isNull('photo1') and obverseImage.isNull():
@@ -467,7 +468,7 @@ class CollectionModel(QSqlTableModel):
 
         # Checking for SQLITE_MAX_SQL_LENGTH (default value - 1 000 000)
         if len(combinedFilter) > 900000:
-            QtGui.QMessageBox.warning(self.parent(),
+            QMessageBox.warning(self.parent(),
                             self.tr("Filtering"),
                             self.tr("Filter is too complex. Will be ignored"))
             return
@@ -552,12 +553,12 @@ class Collection(QtCore.QObject):
             self.db.setDatabaseName(fileName)
             if not self.db.open() or not self.db.tables():
                 print(self.db.lastError().text())
-                QtGui.QMessageBox.critical(self.parent(),
+                QMessageBox.critical(self.parent(),
                                 self.tr("Open collection"),
                                 self.tr("Can't open collection %s") % fileName)
                 return False
         else:
-            QtGui.QMessageBox.critical(self.parent(),
+            QMessageBox.critical(self.parent(),
                                 self.tr("Open collection"),
                                 self.tr("Collection %s not exists") % fileName)
             return False
@@ -566,7 +567,7 @@ class Collection(QtCore.QObject):
 
         self.settings = CollectionSettings(self)
         if self.settings['Type'] != version.AppName:
-            QtGui.QMessageBox.critical(self.parent(),
+            QMessageBox.critical(self.parent(),
                     self.tr("Open collection"),
                     self.tr("Collection %s in wrong format %s") % (fileName, version.AppName))
             return False
@@ -574,7 +575,7 @@ class Collection(QtCore.QObject):
         if self.settings['Password'] != cryptPassword():
             dialog = PasswordDialog(self, self.parent())
             result = dialog.exec_()
-            if result == QtGui.QDialog.Rejected:
+            if result == QDialog.Rejected:
                 return False
 
         print(fileName)
@@ -590,7 +591,7 @@ class Collection(QtCore.QObject):
 
     def create(self, fileName):
         if QtCore.QFileInfo(fileName).exists():
-            QtGui.QMessageBox.critical(self.parent(),
+            QMessageBox.critical(self.parent(),
                                     self.tr("Create collection"),
                                     self.tr("Specified file already exists"))
             return False
@@ -598,7 +599,7 @@ class Collection(QtCore.QObject):
         self.db.setDatabaseName(fileName)
         if not self.db.open():
             print(self.db.lastError().text())
-            QtGui.QMessageBox.critical(self.parent(),
+            QMessageBox.critical(self.parent(),
                                        self.tr("Create collection"),
                                        self.tr("Can't open collection"))
             return False
@@ -720,10 +721,10 @@ class Collection(QtCore.QObject):
         dialog.exec_()
 
     def referenceMenu(self, parent=None):
-        createReferenceAct = QtGui.QAction(self.tr("Fill from collection"), parent)
+        createReferenceAct = QAction(self.tr("Fill from collection"), parent)
         createReferenceAct.triggered.connect(self.createReference)
 
-        editReferenceAct = QtGui.QAction(self.tr("Edit..."), parent)
+        editReferenceAct = QAction(self.tr("Edit..."), parent)
         editReferenceAct.triggered.connect(self.editReference)
 
         return [createReferenceAct, editReferenceAct]
@@ -737,7 +738,7 @@ class Collection(QtCore.QObject):
         backupFileName = backupDir.filePath("%s_%s.db" % (self.getCollectionName(), QtCore.QDateTime.currentDateTime().toString('yyMMddhhmm')))
         srcFile = QtCore.QFile(self.fileName)
         if not srcFile.copy(backupFileName):
-            QtGui.QMessageBox.critical(self.parent(),
+            QMessageBox.critical(self.parent(),
                             self.tr("Backup collection"),
                             self.tr("Can't make a collection backup at %s") %
                                                                 backupFileName)

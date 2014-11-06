@@ -2,7 +2,8 @@
 
 import urllib.parse
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.Auctions import AuctionItem
 from OpenNumismat.Auctions import _AuctionParser, _NotDoneYetError, _CanceledError
@@ -36,10 +37,10 @@ class MolotokParser(_AuctionParser):
         if alleLink:
             bidCount = int(alleLink[0].text_content().split()[0])
             if bidCount < 2:
-                QtGui.QMessageBox.information(self.parent(),
+                QMessageBox.information(self.parent(),
                                     self.tr("Parse auction lot"),
                                     self.tr("Only 1 bid"),
-                                    QtGui.QMessageBox.Ok)
+                                    QMessageBox.Ok)
         else:
             raise _CanceledError()
 
@@ -295,9 +296,9 @@ class ConrosParser(_AuctionParser):
 
         content = self.html.cssselect('p#lot_state.lot_info_box')[0].cssselect('#rate_count')[0].text_content()
         if int(content) < 2:
-            QtGui.QMessageBox.information(self.parent(), self.tr("Parse auction lot"),
+            QMessageBox.information(self.parent(), self.tr("Parse auction lot"),
                                 self.tr("Only 1 bid"),
-                                QtGui.QMessageBox.Ok)
+                                QMessageBox.Ok)
 
         content = self.html.cssselect('p#lot_state.lot_info_box')[0].cssselect('#price')[0].text_content()
         auctionItem.price = stringToMoney(content)
@@ -362,10 +363,10 @@ class WolmarParser(_AuctionParser):
         eIndex = content[bIndex:].find("Лот закрыт") + bIndex
         content = content[bIndex + 1:eIndex].strip()
         if int(content) < 2:
-            QtGui.QMessageBox.information(self.parent(),
+            QMessageBox.information(self.parent(),
                                 self.tr("Parse auction lot"),
                                 self.tr("Only 1 bid"),
-                                QtGui.QMessageBox.Ok)
+                                QMessageBox.Ok)
 
         content = values[1].text_content()
         bIndex = content.find("Ставка")

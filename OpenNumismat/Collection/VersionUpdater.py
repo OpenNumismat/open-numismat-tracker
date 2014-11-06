@@ -1,6 +1,6 @@
-from PyQt4 import QtCore
-from PyQt4.QtGui import QApplication
-from PyQt4.QtSql import QSqlQuery
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtSql import QSqlQuery
 
 from OpenNumismat.Tools import Gui
 

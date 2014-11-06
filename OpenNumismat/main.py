@@ -5,7 +5,8 @@ import shutil
 import sys
 import traceback
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 import OpenNumismat
 from OpenNumismat.Settings import Settings
@@ -21,7 +22,7 @@ def main():
         # Work around system locale not specified (under Linux or Mac OS)
         pass
 
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     QtCore.QCoreApplication.setOrganizationName(version.Company)
     QtCore.QCoreApplication.setApplicationName(version.AppName)
@@ -67,7 +68,7 @@ def main():
     app.installTranslator(translator)
 
     translatorQt = QtCore.QTranslator()
-    translatorQt.load('qt_' + lang, OpenNumismat.PRJ_PATH)
+    translatorQt.load('qtbase_' + lang, OpenNumismat.PRJ_PATH)
     app.installTranslator(translatorQt)
 
     mainWindow = MainWindow()
@@ -84,15 +85,15 @@ def main():
 def exceptHook(type_, value, tback):
     stack = ''.join(traceback.format_exception(type_, value, tback))
 
-    title = QtGui.QApplication.translate("ExcpHook", "System error")
-    text = QtGui.QApplication.translate("ExcpHook",
+    title = QApplication.translate("ExcpHook", "System error")
+    text = QApplication.translate("ExcpHook",
                         "A system error occurred.\n"
                         "Do you want to send an error message to the author\n"
                         "(Google account required)?")
-    msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, title, text)
+    msgBox = QMessageBox(QMessageBox.Information, title, text)
     msgBox.setDetailedText(stack)
-    msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-    if msgBox.exec_() == QtGui.QMessageBox.Yes:
+    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    if msgBox.exec_() == QMessageBox.Yes:
         line = traceback.extract_tb(tback, 1)[0]
         subject = "[v%s] %s - %s:%d" % (version.Version, type_.__name__,
                                         line[0], line[1])

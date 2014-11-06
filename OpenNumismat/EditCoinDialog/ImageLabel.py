@@ -1,20 +1,20 @@
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt, QStandardPaths
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.Tools import TemporaryDir
 from OpenNumismat import version
 
 
-class ImageLabel(QtGui.QLabel):
+class ImageLabel(QLabel):
     def __init__(self, parent=None):
         super(ImageLabel, self).__init__(parent)
 
         self.clear()
 
         self.setBackgroundRole(QtGui.QPalette.Base)
-        self.setSizePolicy(QtGui.QSizePolicy.Ignored,
-                           QtGui.QSizePolicy.Ignored)
+        self.setSizePolicy(QSizePolicy.Ignored,
+                           QSizePolicy.Ignored)
         self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -94,8 +94,8 @@ class ImageLabel(QtGui.QLabel):
 
 
 class ImageEdit(ImageLabel):
-    latestDir = QtGui.QDesktopServices.storageLocation(
-                                    QtGui.QDesktopServices.PicturesLocation)
+    latestDir = QStandardPaths.displayName(
+                                    QStandardPaths.PicturesLocation)
 
     def __init__(self, name, parent=None):
         super(ImageEdit, self).__init__(parent)
@@ -103,40 +103,40 @@ class ImageEdit(ImageLabel):
         self.name = name or 'photo'
         self._photo = None
 
-        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Plain)
+        self.setFrameStyle(QFrame.Panel | QFrame.Plain)
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenu)
 
     def contextMenu(self, pos):
-        style = QtGui.QApplication.style()
+        style = QApplication.style()
 
-        icon = style.standardIcon(QtGui.QStyle.SP_DirOpenIcon)
+        icon = style.standardIcon(QStyle.SP_DirOpenIcon)
         text = QApplication.translate('ImageEdit', "Load...")
-        load = QtGui.QAction(icon, text, self)
+        load = QAction(icon, text, self)
         load.triggered.connect(self.openImage)
 
         text = QApplication.translate('ImageEdit', "Paste")
-        paste = QtGui.QAction(text, self)
+        paste = QAction(text, self)
         paste.triggered.connect(self.pasteImage)
 
         text = QApplication.translate('ImageEdit', "Copy")
-        copy = QtGui.QAction(text, self)
+        copy = QAction(text, self)
         copy.triggered.connect(self.copyImage)
         copy.setDisabled(self.image.isNull())
 
-        icon = style.standardIcon(QtGui.QStyle.SP_TrashIcon)
+        icon = style.standardIcon(QStyle.SP_TrashIcon)
         text = QApplication.translate('ImageEdit', "Delete")
-        delete = QtGui.QAction(icon, text, self)
+        delete = QAction(icon, text, self)
         delete.triggered.connect(self.deleteImage)
         delete.setDisabled(self.image.isNull())
 
         text = QApplication.translate('ImageEdit', "Save as...")
-        save = QtGui.QAction(text, self)
+        save = QAction(text, self)
         save.triggered.connect(self.saveImage)
         save.setDisabled(self.image.isNull())
 
-        menu = QtGui.QMenu()
+        menu = QMenu()
         menu.addAction(load)
         menu.setDefaultAction(load)
         menu.addAction(save)
@@ -157,7 +157,7 @@ class ImageEdit(ImageLabel):
         filter_ = QApplication.translate('ImageEdit',
                             "Images (*.jpg *.jpeg *.bmp *.png *.tiff *.gif);;"
                             "All files (*.*)")
-        fileName = QtGui.QFileDialog.getOpenFileName(self,
+        fileName, _selectedFilter = QFileDialog.getOpenFileName(self,
                 caption, ImageEdit.latestDir,
                 filter_)
         if fileName:
@@ -177,7 +177,7 @@ class ImageEdit(ImageLabel):
                             "Images (*.jpg *.jpeg *.bmp *.png *.tiff *.gif);;"
                             "All files (*.*)")
         # TODO: Set default name to coin title + field name
-        fileName = QtGui.QFileDialog.getSaveFileName(self,
+        fileName, _selectedFilter = QFileDialog.getSaveFileName(self,
                 caption, ImageEdit.latestDir + '/' + self.name,
                 filter_)
         if fileName:
@@ -188,7 +188,7 @@ class ImageEdit(ImageLabel):
             self.image.save(fileName)
 
     def pasteImage(self):
-        mime = QtGui.QApplication.clipboard().mimeData()
+        mime = QApplication.clipboard().mimeData()
         if mime.hasUrls():
             url = mime.urls()[0]
             self.loadFromFile(url.toLocalFile())
@@ -200,7 +200,7 @@ class ImageEdit(ImageLabel):
 
     def copyImage(self):
         if not self.image.isNull():
-            clipboard = QtGui.QApplication.clipboard()
+            clipboard = QApplication.clipboard()
             clipboard.setImage(self.image)
 
     def clear(self):

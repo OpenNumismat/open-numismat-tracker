@@ -2,9 +2,10 @@ import operator
 import pickle
 import os.path
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4.QtSql import QSqlQuery
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt, pyqtSignal, QSortFilterProxyModel
+from PyQt5.QtSql import QSqlQuery
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.EditCoinDialog.EditCoinDialog import EditCoinDialog
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
@@ -33,9 +34,9 @@ def clipboardToText(text):
     return text
 
 
-class ImageDelegate(QtGui.QStyledItemDelegate):
+class ImageDelegate(QStyledItemDelegate):
     def __init__(self, parent):
-        QtGui.QStyledItemDelegate.__init__(self, parent)
+        QStyledItemDelegate.__init__(self, parent)
 
     def paint(self, painter, option, index):
         data = index.data()
@@ -53,7 +54,7 @@ class ImageDelegate(QtGui.QStyledItemDelegate):
             painter.drawPixmap(rect, pixmap)
 
 
-class SortFilterProxyModel(QtGui.QSortFilterProxyModel):
+class SortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super(SortFilterProxyModel, self).__init__(parent)
         self.setDynamicSortFilter(True)
@@ -67,16 +68,17 @@ class SortFilterProxyModel(QtGui.QSortFilterProxyModel):
         leftData = self.model.dataDisplayRole(left)
         rightData = self.model.dataDisplayRole(right)
 
-        if self.order == Qt.AscendingOrder:
-            if leftData == '' or isinstance(leftData, QtCore.QPyNullVariant):
-                return False
-            elif rightData == '' or isinstance(rightData, QtCore.QPyNullVariant):
-                return True
-        else:
-            if rightData == '' or isinstance(rightData, QtCore.QPyNullVariant):
-                return False
-            elif leftData == '' or isinstance(leftData, QtCore.QPyNullVariant):
-                return True
+# TODO: Check after porting to PyQt5
+#         if self.order == Qt.AscendingOrder:
+#             if leftData == '' or isinstance(leftData, QtCore.QPyNullVariant):
+#                 return False
+#             elif rightData == '' or isinstance(rightData, QtCore.QPyNullVariant):
+#                 return True
+#         else:
+#             if rightData == '' or isinstance(rightData, QtCore.QPyNullVariant):
+#                 return False
+#             elif leftData == '' or isinstance(leftData, QtCore.QPyNullVariant):
+#                 return True
 
         if isinstance(leftData, str):
             rightData = str(rightData)
@@ -86,7 +88,7 @@ class SortFilterProxyModel(QtGui.QSortFilterProxyModel):
         return leftData < rightData
 
 
-class ListView(QtGui.QTableView):
+class ListView(QTableView):
     rowChanged = pyqtSignal(object)
     # TODO: Changes mime type
     MimeType = 'num/data'
@@ -96,14 +98,14 @@ class ListView(QtGui.QTableView):
 
         self.listParam = listParam
 
-        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.doubleClicked.connect(self.itemDClicked)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.contextMenuEvent)
         self.setSortingEnabled(True)
-        self.horizontalHeader().setMovable(True)
+        self.horizontalHeader().setSectionsMovable(True)
         self.horizontalHeader().sectionDoubleClicked.connect(
                                                 self.sectionDoubleClicked)
         self.horizontalHeader().sectionResized.connect(self.columnResized)
@@ -124,8 +126,8 @@ class ListView(QtGui.QTableView):
         self.verticalHeader().setVisible(False)
         self.defaultHeight = self.verticalHeader().defaultSectionSize()
 
-        self.listCountLabel = QtGui.QLabel()
-        self.listSelectedLabel = QtGui.QLabel(self.tr("0 coin(s) selected"))
+        self.listCountLabel = QLabel()
+        self.listSelectedLabel = QLabel(self.tr("0 coin(s) selected"))
 
         # Show image data as images
         for field in listParam.fields:
@@ -155,7 +157,7 @@ class ListView(QtGui.QTableView):
 
     def headerContextMenuEvent(self, pos):
         self.pos = pos  # store pos for action
-        menu = QtGui.QMenu(self)
+        menu = QMenu(self)
         menu.addAction(self.tr("Select columns..."), self.selectColumns)
         menu.addAction(self.tr("Hide"), self._hideColumn)
         menu.addSeparator()
@@ -177,7 +179,7 @@ class ListView(QtGui.QTableView):
     def selectColumns(self):
         dialog = SelectColumnsDialog(self.listParam, self)
         result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        if result == QDialog.Accepted:
             self.listParam.save()
 
             self._moveColumns()
@@ -351,7 +353,7 @@ class ListView(QtGui.QTableView):
             return super(ListView, self).keyPressEvent(event)
 
     def contextMenuEvent(self, pos):
-        menu = QtGui.QMenu(self)
+        menu = QMenu(self)
         act = menu.addAction(createIcon('pencil.png'),
                              self.tr("Edit..."), self._edit)
         act.setShortcut('Enter')
@@ -372,8 +374,8 @@ class ListView(QtGui.QTableView):
         act.setEnabled(len(self.selectedRows()) > 1)
         menu.addSeparator()
 
-        style = QtGui.QApplication.style()
-        icon = style.standardIcon(QtGui.QStyle.SP_TrashIcon)
+        style = QApplication.style()
+        icon = style.standardIcon(QStyle.SP_TrashIcon)
         menu.addAction(icon, self.tr("Delete"),
                        self._delete, QtGui.QKeySequence.Delete)
         menu.exec_(self.mapToGlobal(pos))
@@ -444,7 +446,7 @@ class ListView(QtGui.QTableView):
         if lastExportDir:
             defaultFileName = os.path.join(lastExportDir, defaultFileName)
 
-        fileName, filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(self,
+        fileName, filter_ = QFileDialog.getSaveFileNameAndFilter(self,
                                     self.tr("Save as"),
                                     defaultFileName,
                                     filter=';;'.join(filters))
@@ -516,7 +518,7 @@ class ListView(QtGui.QTableView):
         record = self.model().record(index.row())
         dialog = EditCoinDialog(self.model(), record, self)
         result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        if result == QDialog.Accepted:
             updatedRecord = dialog.getRecord()
             self.model().setRecord(index.row(), updatedRecord)
             self.model().submitAll()
@@ -538,7 +540,7 @@ class ListView(QtGui.QTableView):
 
         dialog = EditCoinDialog(self.model(), multiRecord, self, usedFields)
         result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        if result == QDialog.Accepted:
             progressDlg = Gui.ProgressDialog(self.tr("Updating records"),
                                         self.tr("Cancel"), len(indexes), self)
 
@@ -598,7 +600,7 @@ class ListView(QtGui.QTableView):
         mime.setText('\n'.join(textData))
         mime.setData(ListView.MimeType, pickle.dumps(pickleData))
 
-        clipboard = QtGui.QApplication.clipboard()
+        clipboard = QApplication.clipboard()
         clipboard.setMimeData(mime)
 
     def __insertCoin(self, record, count):
@@ -606,13 +608,13 @@ class ListView(QtGui.QTableView):
         if count > 1:
             dialog.setManyCoins()
         result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        if result == QDialog.Accepted:
             self.model().appendRecord(record)
 
         return dialog.clickedButton
 
     def _paste(self):
-        clipboard = QtGui.QApplication.clipboard()
+        clipboard = QApplication.clipboard()
         mime = clipboard.mimeData()
         progressDlg = None
 
@@ -638,9 +640,9 @@ class ListView(QtGui.QTableView):
                     self.model().appendRecord(record)
                 else:
                     btn = self.__insertCoin(record, len(pickleData) - progress)
-                    if btn == QtGui.QDialogButtonBox.Abort:
+                    if btn == QDialogButtonBox.Abort:
                         break
-                    if btn == QtGui.QDialogButtonBox.SaveAll:
+                    if btn == QDialogButtonBox.SaveAll:
                         progressDlg = Gui.ProgressDialog(
                                     self.tr("Inserting records"),
                                     self.tr("Cancel"), len(pickleData), self)
@@ -672,9 +674,9 @@ class ListView(QtGui.QTableView):
                     self.model().appendRecord(record)
                 else:
                     btn = self.__insertCoin(record, len(textData) - progress)
-                    if btn == QtGui.QDialogButtonBox.Abort:
+                    if btn == QDialogButtonBox.Abort:
                         break
-                    if btn == QtGui.QDialogButtonBox.SaveAll:
+                    if btn == QDialogButtonBox.SaveAll:
                         progressDlg = Gui.ProgressDialog(
                                     self.tr("Inserting records"),
                                     self.tr("Cancel"), len(pickleData), self)
@@ -686,12 +688,12 @@ class ListView(QtGui.QTableView):
         if not indexes:
             indexes = self.selectedRows()
 
-        result = QtGui.QMessageBox.information(self, self.tr("Delete"),
+        result = QMessageBox.information(self, self.tr("Delete"),
                     self.tr("Are you sure to remove a %n coin(s)?", '',
                                                                  len(indexes)),
-                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel,
-                    QtGui.QMessageBox.Cancel)
-        if result == QtGui.QMessageBox.Yes:
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                    QMessageBox.Cancel)
+        if result == QMessageBox.Yes:
             progressDlg = Gui.ProgressDialog(self.tr("Deleting records"),
                                         self.tr("Cancel"), len(indexes), self)
 

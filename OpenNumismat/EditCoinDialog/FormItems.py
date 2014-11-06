@@ -1,7 +1,8 @@
 import locale
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import QMargins, QUrl, QDate, Qt
+from PyQt5 import QtGui
+from PyQt5.QtCore import QMargins, QUrl, QDate, Qt
+from PyQt5.QtWidgets import *
 
 from OpenNumismat.Tools.Gui import createIcon
 
@@ -79,33 +80,33 @@ class NumberValidator(QtGui.QIntValidator):
         return QtGui.QValidator.Acceptable, input_, pos
 
 
-class LineEdit(QtGui.QLineEdit):
+class LineEdit(QLineEdit):
     def __init__(self, parent=None):
         super(LineEdit, self).__init__(parent)
         self.setMaxLength(1024)
         self.setMinimumWidth(100)
 
 
-class UrlLineEdit(QtGui.QWidget):
+class UrlLineEdit(QWidget):
     def __init__(self, parent=None):
         super(UrlLineEdit, self).__init__(parent)
 
         self.lineEdit = LineEdit(parent)
 
-        buttonLoad = QtGui.QPushButton(createIcon('world.png'), '', parent)
+        buttonLoad = QPushButton(createIcon('world.png'), '', parent)
         buttonLoad.setFixedWidth(25)
         buttonLoad.setToolTip(self.tr("Open specified URL"))
         buttonLoad.clicked.connect(self.clickedButtonLoad)
 
-        style = QtGui.QApplication.style()
-        icon = style.standardIcon(QtGui.QStyle.SP_DialogOpenButton)
+        style = QApplication.style()
+        icon = style.standardIcon(QStyle.SP_DialogOpenButton)
 
-        self.buttonOpen = QtGui.QPushButton(icon, '', parent)
+        self.buttonOpen = QPushButton(icon, '', parent)
         self.buttonOpen.setFixedWidth(25)
         self.buttonOpen.setToolTip(self.tr("Select file from disc"))
         self.buttonOpen.clicked.connect(self.clickedButtonOpen)
 
-        layout = QtGui.QHBoxLayout()
+        layout = QHBoxLayout()
         layout.addWidget(self.lineEdit)
         layout.addWidget(self.buttonOpen)
         layout.addWidget(buttonLoad)
@@ -114,7 +115,7 @@ class UrlLineEdit(QtGui.QWidget):
         self.setLayout(layout)
 
     def clickedButtonOpen(self):
-        file = QtGui.QFileDialog.getOpenFileName(self,
+        file, _selectedFilter = QFileDialog.getOpenFileName(self,
                                                 self.tr("Select file"),
                                                 self.text(),
                                                 "*.*")
@@ -148,25 +149,25 @@ class UrlLineEdit(QtGui.QWidget):
             self.buttonOpen.show()
 
 
-class LineEditRef(QtGui.QWidget):
+class LineEditRef(QWidget):
     def __init__(self, reference, parent=None):
         super(LineEditRef, self).__init__(parent)
 
         self.reference = reference
         self.reference.changed.connect(self.setText)
 
-        self.comboBox = QtGui.QComboBox(self)
+        self.comboBox = QComboBox(self)
         self.comboBox.setEditable(True)
         self.comboBox.lineEdit().setMaxLength(1024)
         self.comboBox.setMinimumWidth(120)
-        self.comboBox.setInsertPolicy(QtGui.QComboBox.NoInsert)
+        self.comboBox.setInsertPolicy(QComboBox.NoInsert)
 
         self.comboBox.setModel(reference.model)
         self.comboBox.setModelColumn(reference.model.fieldIndex('value'))
 
         self.comboBox.setCurrentIndex(-1)
 
-        layout = QtGui.QHBoxLayout()
+        layout = QHBoxLayout()
         layout.addWidget(self.comboBox)
         layout.addWidget(reference.button(self))
         layout.setContentsMargins(QMargins())
@@ -225,44 +226,44 @@ class LineEditRef(QtGui.QWidget):
                 dependent.setText(text)
 
 
-class ShortLineEdit(QtGui.QLineEdit):
+class ShortLineEdit(QLineEdit):
     def __init__(self, parent=None):
         super(ShortLineEdit, self).__init__(parent)
         self.setMaxLength(10)
         self.setMinimumWidth(100)
-        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def sizeHint(self):
         return self.minimumSizeHint()
 
 
-class UserNumericEdit(QtGui.QLineEdit):
+class UserNumericEdit(QLineEdit):
     def __init__(self, parent=None):
         super(UserNumericEdit, self).__init__(parent)
         self.setMaxLength(25)
         self.setMinimumWidth(100)
-        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                    QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.SpinBox))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
+                    QSizePolicy.Fixed, QSizePolicy.SpinBox))
 
     def sizeHint(self):
         return self.minimumSizeHint()
 
 
-class NumberEdit(QtGui.QLineEdit):
+class NumberEdit(QLineEdit):
     def __init__(self, parent=None):
         super(NumberEdit, self).__init__(parent)
         validator = NumberValidator(0, 9999, parent)
         self.setValidator(validator)
         self.setMaxLength(4)
         self.setMinimumWidth(100)
-        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                    QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.SpinBox))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
+                    QSizePolicy.Fixed, QSizePolicy.SpinBox))
 
     def sizeHint(self):
         return self.minimumSizeHint()
 
 
-class _DoubleEdit(QtGui.QLineEdit):
+class _DoubleEdit(QLineEdit):
     def __init__(self, bottom, top, decimals, parent=None):
         super(_DoubleEdit, self).__init__(parent)
         self._decimals = decimals
@@ -324,8 +325,8 @@ class BigIntEdit(_DoubleEdit):
         super(BigIntEdit, self).__init__(0, 999999999999999, 0, parent)
         self.setMaxLength(15 + 4)  # additional 4 symbol for thousands separator
         self.setMinimumWidth(100)
-        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                        QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.SpinBox))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
+                        QSizePolicy.Fixed, QSizePolicy.SpinBox))
 
 
 class ValueEdit(_DoubleEdit):
@@ -333,8 +334,8 @@ class ValueEdit(_DoubleEdit):
         super(ValueEdit, self).__init__(0, 9999999999, 3, parent)
         self.setMaxLength(17)
         self.setMinimumWidth(100)
-        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                        QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.SpinBox))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
+                        QSizePolicy.Fixed, QSizePolicy.SpinBox))
 
     def sizeHint(self):
         return self.minimumSizeHint()
@@ -345,14 +346,14 @@ class MoneyEdit(_DoubleEdit):
         super(MoneyEdit, self).__init__(0, 9999999999, 2, parent)
         self.setMaxLength(16)
         self.setMinimumWidth(100)
-        self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
-                        QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.SpinBox))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,
+                        QSizePolicy.Fixed, QSizePolicy.SpinBox))
 
     def sizeHint(self):
         return self.minimumSizeHint()
 
 
-class TextEdit(QtGui.QTextEdit):
+class TextEdit(QTextEdit):
     def __init__(self, parent=None):
         super(TextEdit, self).__init__(parent)
 
@@ -363,12 +364,12 @@ class TextEdit(QtGui.QTextEdit):
         return self.minimumSizeHint()
 
 
-class DateEdit(QtGui.QDateEdit):
+class DateEdit(QDateEdit):
     DEFAULT_DATE = QDate(2000, 1, 1)
 
     def __init__(self, parent=None):
         super(DateEdit, self).__init__(parent)
-        calendar = QtGui.QCalendarWidget()
+        calendar = QCalendarWidget()
         calendar.setGridVisible(True)
         self.setCalendarPopup(True)
         self.setCalendarWidget(calendar)
@@ -388,7 +389,7 @@ class DateEdit(QtGui.QDateEdit):
 
     def keyPressEvent(self, event):
         if event.key() in [Qt.Key_Delete, Qt.Key_Backspace]:
-            lineEdit = self.findChild(QtGui.QLineEdit)
+            lineEdit = self.findChild(QLineEdit)
             if lineEdit.selectedText() == lineEdit.text():
                 default_date = self.DEFAULT_DATE
                 self.setDate(default_date)
@@ -398,10 +399,10 @@ class DateEdit(QtGui.QDateEdit):
     def __clearDefaultDate(self):
         default_date = self.DEFAULT_DATE
         if self.date() == default_date:
-            lineEdit = self.findChild(QtGui.QLineEdit)
+            lineEdit = self.findChild(QLineEdit)
             lineEdit.setText("")
 
 
-class DateTimeEdit(QtGui.QDateTimeEdit):
+class DateTimeEdit(QDateTimeEdit):
     def __init__(self, parent=None):
         super(DateTimeEdit, self).__init__(parent)
