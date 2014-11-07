@@ -1,5 +1,5 @@
-from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import *
 
 from OpenNumismat.PageView import PageView
@@ -12,7 +12,7 @@ class TabBar(QTabBar):
     def __init__(self, parent):
         super(TabBar, self).__init__(parent)
 
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
 
     def mouseDoubleClickEvent(self, event):
         index = self.tabAt(event.pos())
@@ -74,7 +74,7 @@ class TabView(QTabWidget):
         self.__actions['select'] = selectColumnsAct
 
         closeListAct = QAction(self.tr("Close"), self)
-        closeListAct.setShortcut(QtGui.QKeySequence.Close)
+        closeListAct.setShortcut(QKeySequence.Close)
         closeListAct.triggered.connect(self.closePage)
         self.__actions['close'] = closeListAct
 
@@ -181,6 +181,12 @@ class TabView(QTabWidget):
         listView.selectColumns()
 
     def closePage(self, index=None):
+        if self.count() <= 1:
+            QMessageBox.information(self, self.tr("Remove page"),
+                    self.tr("Can't close latest opened page.\n"
+                            "Add a new one first."))
+            return
+
         if not index:
             index = self.currentIndex()
         page = self.widget(index)
@@ -188,6 +194,12 @@ class TabView(QTabWidget):
         self.collection.pages().closePage(page)
 
     def removePage(self):
+        if self.count() <= 1:
+            QMessageBox.information(self, self.tr("Remove page"),
+                    self.tr("Can't remove latest opened page.\n"
+                            "Add a new one first."))
+            return
+
         index = self.currentIndex()
         pageTitle = self.tabText(index)
         result = QMessageBox.question(self, self.tr("Remove page"),
