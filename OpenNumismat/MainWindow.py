@@ -45,45 +45,6 @@ class MainWindow(QMainWindow):
                                     self.tr("Clear all filters"), self)
         cancelFilteringAct.triggered.connect(self.cancelFilteringEvent)
 
-        exitAct = QAction(createIcon('door_in.png'),
-                                self.tr("E&xit"), self)
-        exitAct.setShortcut(QtGui.QKeySequence.Quit)
-        exitAct.triggered.connect(self.close)
-
-        menubar = self.menuBar()
-        file = menubar.addMenu(self.tr("&File"))
-        file.addAction(importAct)
-        file.addAction(uploadImagesAct)
-        file.addSeparator()
-        file.addAction(settingsAct)
-        file.addSeparator()
-        file.addAction(exitAct)
-
-        addCoinAct = QAction(createIcon('add.png'),
-                                   self.tr("Add"), self)
-        addCoinAct.setShortcut('Insert')
-        addCoinAct.triggered.connect(self.addCoin)
-
-        editCoinAct = QAction(createIcon('pencil.png'),
-                                   self.tr("Edit..."), self)
-        editCoinAct.triggered.connect(self.editCoin)
-
-        style = QApplication.style()
-        icon = style.standardIcon(QStyle.SP_TrashIcon)
-        deleteCoinAct = QAction(icon,
-                                   self.tr("Delete"), self)
-        deleteCoinAct.setShortcut(QtGui.QKeySequence.Delete)
-        deleteCoinAct.triggered.connect(self.deleteCoin)
-
-        coin = menubar.addMenu(self.tr("Coin"))
-        coin.addAction(addCoinAct)
-        coin.addAction(editCoinAct)
-        coin.addAction(deleteCoinAct)
-
-        viewBrowserAct = QAction(createIcon('page_white_world.png'),
-                                   self.tr("View in browser"), self)
-        viewBrowserAct.triggered.connect(self.viewBrowser)
-
         newCollectionAct = QAction(self.tr("&New..."), self)
         newCollectionAct.triggered.connect(self.newCollectionEvent)
 
@@ -111,17 +72,55 @@ class MainWindow(QMainWindow):
                                               self.tr("Set password..."), self)
         passwordCollectionAct.triggered.connect(self.passwordCollectionEvent)
 
-        collectionMenu = menubar.addMenu(self.tr("Collection"))
-        collectionMenu.addAction(newCollectionAct)
-        collectionMenu.addAction(openCollectionAct)
-        collectionMenu.addAction(backupCollectionAct)
-        collectionMenu.addAction(vacuumCollectionAct)
-        collectionMenu.addAction(passwordCollectionAct)
-        collectionMenu.addAction(descriptionCollectionAct)
-        collectionMenu.addSeparator()
+        self.exitAct = QAction(createIcon('door_in.png'),
+                                self.tr("E&xit"), self)
+        self.exitAct.setShortcut(QtGui.QKeySequence.Quit)
+        self.exitAct.triggered.connect(self.close)
+
+        menubar = self.menuBar()
+        file = menubar.addMenu(self.tr("&File"))
+        file.addAction(newCollectionAct)
+        file.addAction(openCollectionAct)
+        file.addSeparator()
+        file.addAction(backupCollectionAct)
+        file.addAction(vacuumCollectionAct)
+        file.addAction(passwordCollectionAct)
+        file.addAction(descriptionCollectionAct)
+        file.addSeparator()
+        file.addAction(importAct)
+        file.addAction(uploadImagesAct)
+        file.addSeparator()
+        file.addAction(settingsAct)
+        file.addSeparator()
+        file.addAction(self.exitAct)
 
         self.latestActions = []
-        self.__updateLatest(collectionMenu)
+        self.__updateLatest(file)
+
+        addCoinAct = QAction(createIcon('add.png'),
+                                   self.tr("Add"), self)
+        addCoinAct.setShortcut('Insert')
+        addCoinAct.triggered.connect(self.addCoin)
+
+        editCoinAct = QAction(createIcon('pencil.png'),
+                                   self.tr("Edit..."), self)
+        editCoinAct.triggered.connect(self.editCoin)
+
+        style = QApplication.style()
+        icon = style.standardIcon(QStyle.SP_TrashIcon)
+        deleteCoinAct = QAction(icon,
+                                   self.tr("Delete"), self)
+        deleteCoinAct.setShortcut(QtGui.QKeySequence.Delete)
+        deleteCoinAct.triggered.connect(self.deleteCoin)
+
+        coin = menubar.addMenu(self.tr("Coin"))
+        coin.addAction(addCoinAct)
+        coin.addAction(editCoinAct)
+        coin.addAction(deleteCoinAct)
+
+        viewBrowserAct = QAction(createIcon('page_white_world.png'),
+                                   self.tr("View in browser"), self)
+        viewBrowserAct.triggered.connect(self.viewBrowser)
 
         self.viewTab = TabView(self)
 
@@ -170,6 +169,8 @@ class MainWindow(QMainWindow):
 
         toolBar = QToolBar(self.tr("Toolbar"), self)
         toolBar.setMovable(False)
+        toolBar.addAction(openCollectionAct)
+        toolBar.addSeparator()
         toolBar.addAction(addCoinAct)
         toolBar.addAction(editCoinAct)
         toolBar.addAction(viewBrowserAct)
@@ -224,7 +225,8 @@ class MainWindow(QMainWindow):
         for act in latest.actions():
             self.latestActions.append(act)
             act.latestTriggered.connect(self.openCollection)
-            self.__menu.addAction(act)
+            self.__menu.insertAction(self.exitAct, act)
+        self.__menu.insertSeparator(self.exitAct)
 
     def cancelFilteringEvent(self):
         listView = self.viewTab.currentListView()
