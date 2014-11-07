@@ -2,6 +2,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import Qt, QStandardPaths
 from PyQt5.QtWidgets import *
 
+import OpenNumismat
 from OpenNumismat.Tools import TemporaryDir
 from OpenNumismat import version
 
@@ -94,8 +95,7 @@ class ImageLabel(QLabel):
 
 
 class ImageEdit(ImageLabel):
-    latestDir = QStandardPaths.displayName(
-                                    QStandardPaths.PicturesLocation)
+    latestDir = OpenNumismat.IMAGE_PATH
 
     def __init__(self, name, parent=None):
         super(ImageEdit, self).__init__(parent)
