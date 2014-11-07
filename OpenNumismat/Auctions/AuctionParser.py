@@ -213,10 +213,15 @@ class AuctionSpbParser(_AuctionParser):
             parts = part.split('.')
             if len(parts) > 1:
                 country = parts[1]
-                for ch in ',0123456789':
+                for ch in '",0123456789':
                     if ch in country:
                         country = country.split(ch)[0]
-                item['country'] = country.strip()
+                country = country.strip()
+                if country:
+                    if country.split()[-1] == 'г':
+                        country = ' '.join(part.split()[:-1])
+                    if country:
+                        item['country'] = country
 
 #        content = table.cssselect('strong')[1].text_content()
 #        grade = content.split()[1]
