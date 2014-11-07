@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from PyQt5 import QtSql
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 
@@ -8,9 +9,11 @@ from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
 class ImportDialog(QDialog):
     params = {}
     
-    def __init__(self, parent=None):
+    def __init__(self, model, parent=None):
         super().__init__(parent,
                          Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint)
+
+        self.db = model.database()
 
         self.setWindowTitle(self.tr("Import"))
 
@@ -22,6 +25,7 @@ class ImportDialog(QDialog):
             self.auctionSelector.addItem(lang)
         self.auctionSelector.setSizePolicy(QSizePolicy.Fixed,
                                            QSizePolicy.Fixed)
+        self.auctionSelector.currentIndexChanged.connect(self.__updateNum)
         form.addRow(self.tr("Auction"), self.auctionSelector)
 
         self.categorySelector = QComboBox(self)
@@ -30,6 +34,7 @@ class ImportDialog(QDialog):
             self.categorySelector.addItem(cat)
         self.categorySelector.setSizePolicy(QSizePolicy.Fixed,
                                             QSizePolicy.Fixed)
+        self.categorySelector.currentIndexChanged.connect(self.__updateNum)
         form.addRow(self.tr("Category"), self.categorySelector)
         
         groupBox = QGroupBox(self.tr("Period"));
@@ -64,10 +69,43 @@ class ImportDialog(QDialog):
         self.setLayout(layout)
         
         self.setFixedSize(self.sizeHint())
+        
+        self.__updateNum()
 
     def start(self):
         self.params['download_images'] = self.downloadImages.isChecked()
         self.params['from_num'] = self.fromNum.value()
         self.params['till_num'] = self.tillNum.value()
         self.params['category'] = self.categorySelector.currentIndex()
-        self.accept()
+
+        if self.params['till_num'] < self.params['from_num']:
+            QMessageBox.critical(self, self.tr("Import"),
+                self.tr("Auction number From should be less or equal to Till")) 
+            return
+
+        lastNum = self.__getMaxNum()
+        if self.params['from_num'] <= lastNum:
+            result = QMessageBox.question(self, self.tr("Import"),
+                self.tr("Auction number %d already imported.\nContinue anyway?") % self.params['from_num'],
+                QMessageBox.Yes | QMessageBox.Cancel,
+                QMessageBox.Cancel)
+            if result == QMessageBox.Yes:
+                self.accept()
+
+    def __updateNum(self):
+        lastNum = self.__getMaxNum()
+        self.fromNum.setValue(lastNum + 1)
+        self.tillNum.setValue(lastNum + 1)
+
+    def __getMaxNum(self):
+        query = QtSql.QSqlQuery(self.db)
+        query.prepare("SELECT MAX(number) FROM auctions WHERE place = ? AND category = ?")
+        query.addBindValue(self.auctionSelector.currentText())
+        query.addBindValue(self.categorySelector.currentText())
+        query.exec_()
+        if query.first():
+            lastNum = query.record().value(0)
+            if lastNum:
+                return lastNum
+        
+        return 0

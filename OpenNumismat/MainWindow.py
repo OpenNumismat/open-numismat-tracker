@@ -481,11 +481,10 @@ class MainWindow(QMainWindow):
         from PyQt5 import QtSql
         from OpenNumismat.Collection.Collection import Photo
         
-        dialog = ImportDialog(self)
+        model = self.collection.model()
+        dialog = ImportDialog(model, self)
         res = dialog.exec_()
         if res == QDialog.Accepted:
-            model = self.collection.model()
-    
             parser = AuctionSpbParser()
             if dialog.params['category'] == 0:
                 categories = range(len(parser.categories()))
