@@ -89,8 +89,10 @@ class ImportDialog(QDialog):
                 self.tr("Auction number %d already imported.\nContinue anyway?") % self.params['from_num'],
                 QMessageBox.Yes | QMessageBox.Cancel,
                 QMessageBox.Cancel)
-            if result == QMessageBox.Yes:
-                self.accept()
+            if result == QMessageBox.Cancel:
+                return
+        
+        self.accept()
 
     def __updateNum(self):
         lastNum = self.__getMaxNum()
