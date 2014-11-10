@@ -70,6 +70,15 @@ class ImportDialog(QDialog):
         
         self.setFixedSize(self.sizeHint())
         
+        query = QtSql.QSqlQuery(self.db)
+        query.prepare("SELECT place, category FROM auctions LIMIT 1")
+        query.exec_()
+        if query.first():
+            place = query.record().value(0)
+            self.auctionSelector.setCurrentText(place)
+            category = query.record().value(1)
+            self.categorySelector.setCurrentText(category)
+
         self.__updateNum()
 
     def start(self):
