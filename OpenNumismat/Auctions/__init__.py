@@ -47,47 +47,28 @@ class _AuctionParser(QtCore.QObject):
         raise NotImplementedError
 
     def parsePage(self, url):
-        self.readHtmlPage(url, self._encoding())
+        if self.readHtmlPage(url, self._encoding()):
+            if len(self.doc) == 0:
+                return
 
-        if len(self.doc) == 0:
-            return
+            try:
+                return self._parsePage()
+            except _NotDoneYetError:
+                print("Auction not done yet")
+            except _CanceledError:
+                print("Auction canceled")
 
-        try:
-            return self._parsePage()
-        except _NotDoneYetError:
-            print("Auction not done yet")
-#            QtGui.QMessageBox.warning(self.parent(),
-#                            self.tr("Parse auction lot"),
-#                            self.tr("Auction not done yet"),
-#                            QtGui.QMessageBox.Ok)
-        except _CanceledError:
-            print("Auction canceled")
-#            QtGui.QMessageBox.warning(self.parent(),
-#                            self.tr("Parse auction lot"),
-#                            self.tr("Auction canceled"),
-#                            QtGui.QMessageBox.Ok)
-
-#    @waitCursorDecorator
     def parse(self, url):
-        self.readHtmlPage(url, self._encoding())
+        if self.readHtmlPage(url, self._encoding()):
+            if len(self.doc) == 0:
+                return
 
-        if len(self.doc) == 0:
-            return
-
-        try:
-            return self._parse()
-        except _NotDoneYetError:
-            print("Auction not done yet")
-#            QtGui.QMessageBox.warning(self.parent(),
-#                            self.tr("Parse auction lot"),
-#                            self.tr("Auction not done yet"),
-#                            QtGui.QMessageBox.Ok)
-        except _CanceledError:
-            print("Auction canceled")
-#            QtGui.QMessageBox.warning(self.parent(),
-#                            self.tr("Parse auction lot"),
-#                            self.tr("Auction canceled"),
-#                            QtGui.QMessageBox.Ok)
+            try:
+                return self._parse()
+            except _NotDoneYetError:
+                print("Auction not done yet")
+            except _CanceledError:
+                print("Auction canceled")
 
     def readHtmlPage(self, url, encoding='utf-8'):
         # TODO: Remove debug output

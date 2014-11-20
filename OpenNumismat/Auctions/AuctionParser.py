@@ -151,7 +151,7 @@ class AuctionSpbParser(_AuctionParser):
     def getPageUrl(self, auctNo, category, page):
         self.page_category = category
 
-        params = urllib.parse.urlencode({'auctID': auctNo, 'catID': category+1, 'order': 'numblot', 'p': page})
+        params = urllib.parse.urlencode({'auctID': auctNo, 'catID': category + 1, 'order': 'numblot', 'p': page})
         url = "http://auction.spb.ru/?%s" % params
         return url
 
@@ -163,6 +163,7 @@ class AuctionSpbParser(_AuctionParser):
         for tr in table.cssselect('tr'):
             tds = tr.cssselect('td')
             if len(tds) >= 9:
+                lotnum = str(tds[0].text_content()).strip()
                 url = hostname + tds[1].cssselect('a')[0].attrib['href']
                 denomination = str(tds[2].text_content()).strip()
                 year = str(tds[3].text_content())
@@ -175,6 +176,7 @@ class AuctionSpbParser(_AuctionParser):
                 totalPayPrice = self.totalPayPrice(price)
                 totalSalePrice = self.totalSalePrice(price)
                 items.append({
+                        'lotnum': lotnum,
                         'url': url, 'denomination': denomination, 'year': year,
                         'mintmark': mintmark, 'material': material,
                         'grade': grade, 'buyer': buyer, 'bids': bids,
@@ -190,9 +192,6 @@ class AuctionSpbParser(_AuctionParser):
 
         item = {}
 
-        content = table.cssselect('strong')[0].text_content()
-        item['lotnum'] = content.split('.')[0].split()[-1]
-
         content = table.cssselect('b')[0].text_content()
         date = content.split()[1]  # convert '12:00:00 05-12-07' to '05-12-07'
         date = QtCore.QDate.fromString(date, 'dd-MM-yyyy')
@@ -200,8 +199,8 @@ class AuctionSpbParser(_AuctionParser):
             date = date.addYears(100)
         item['date'] = date.toString(QtCore.Qt.ISODate)
 
-        content = table.cssselect('strong')[2].text_content()
-        item['buyer'] = content.split()[-1]
+#        content = table.cssselect('strong')[2].text_content()
+#        item['buyer'] = content.split()[-1]
 
         content = table.cssselect('strong')[0].text_content()
         if content[-1] == '.':
@@ -223,22 +222,13 @@ class AuctionSpbParser(_AuctionParser):
                     if country:
                         item['country'] = country
 
-#        content = table.cssselect('strong')[1].text_content()
-#        grade = content.split()[1]
-#        grade = grade.replace('.', '')  # remove end dot
-#        item['grade'] = _stringToGrade(grade)
+        content = table.cssselect('strong')[1].text_content()
+        if content[-1] == '.':
+            content = content[:-1]
+        item['info'] = str(content)
 
-#        item['info'] = self.url
-
-        if len(table.cssselect('table tr')) - 1 < 2:
-            print("Only 1 bid")
-
-#        content = table.cssselect('strong')[2].text_content()
-#        item['price'] = stringToMoney(content)
-
-#        price = float(item['price'])
-#        item['totalPayPrice'] = self.totalPayPrice(price)
-#        item['totalSalePrice'] = self.totalSalePrice(price)
+#        if len(table.cssselect('table tr')) - 1 < 2:
+#            print("Only 1 bid")
 
         images = []
         content = table.cssselect('a')[0]
@@ -277,10 +267,25 @@ class AuctionSpbParser(_AuctionParser):
 
 class ConrosParser(_AuctionParser):
     HostName = 'auction.conros.ru'
+    Categories = [
+#            "Все категории",
+            "Монеты России до 1917 года (золото, серебро)",
+            "Монеты России до 1917 года (медь)",
+            "Допетровские монеты",
+            "Монеты антика, средневековье",
+            "Награды, медали",
+            "Монеты РСФСР, СССР, России",
+            "Монеты иностранные",
+            "Боны",
+        ]
 
     @staticmethod
     def verifyDomain(url):
         return (urllib.parse.urlparse(url).hostname == ConrosParser.HostName)
+
+    @staticmethod
+    def categories():
+        return ConrosParser.Categories
 
     def __init__(self, parent=None):
         super(ConrosParser, self).__init__(parent)
@@ -288,52 +293,107 @@ class ConrosParser(_AuctionParser):
     def _encoding(self):
         return 'windows-1251'
 
+    def pages(self, auctNo, category):
+        self.page_category = category
+
+        page = 0
+        while 1:
+            yield page
+            page = page + 1
+
+    def getPageUrl(self, auctNo, category, page):
+        self.page_category = category
+
+        url = "http://auction.conros.ru/clAuct/%d/%d/%d/0/asc/" % (auctNo - 227, category + 1, page)
+        return url
+
+    def _parsePage(self):
+        items = []
+        hostname = 'http://' + urllib.parse.urlparse(self.url).hostname
+        table = self.html.cssselect('table.productListing')[0]
+
+        for tr in table.cssselect('tr.productListing-data'):
+            tds = tr.cssselect('td')
+            if len(tds) >= 9:
+                lotnum = str(tds[0].text_content()).strip()
+                url = hostname + tds[1].cssselect('a')[0].attrib['href']
+                denomination = str(tds[1].text_content()).strip()
+                year = str(tds[2].text_content())
+                mintmark = str(tds[3].text_content())
+                material = str(tds[4].text_content())
+                grade = _stringToGrade(tds[5].text_content())
+                bids = int(tds[6].text_content())
+                buyer = str(tds[7].text_content())
+                price = stringToMoney(tds[8].text_content())
+                totalPayPrice = self.totalPayPrice(price)
+                totalSalePrice = self.totalSalePrice(price)
+                items.append({
+                        'lotnum': lotnum,
+                        'url': url, 'denomination': denomination, 'year': year,
+                        'mintmark': mintmark, 'material': material,
+                        'grade': grade, 'buyer': buyer, 'bids': bids,
+                        'price': price, 'totalPayPrice': totalPayPrice,
+                        'totalSalePrice': totalSalePrice})
+
+        return items
+
     def _parse(self):
         if self.html.cssselect('div#your_rate')[0].text_content().find("Торги по этому лоту завершены") < 0:
             raise _NotDoneYetError()
 
-        auctionItem = AuctionItem('Конрос')
+        item = {}
 
         content = self.html.cssselect('p#lot_state.lot_info_box')[0].text_content()
         date = content.split()[9]  # extract date
-        auctionItem.date = QtCore.QDate.fromString(date, 'dd.MM.yyyy').toString(QtCore.Qt.ISODate)
+        item['date'] = QtCore.QDate.fromString(date, 'dd.MM.yyyy').toString(QtCore.Qt.ISODate)
 
-        content = self.html.cssselect('p#lot_state.lot_info_box')[0].cssselect('#leader')[0].text_content()
-        auctionItem.buyer = content
+        content = self.html.cssselect('h1.pageHeading')[0].text_content()
+        item['title'] = str(content)
+#        item['title'] = ' '.join(content.split())  # remove extra spaces
 
-        content = self.html.cssselect('div#lot_information')[0].cssselect('p')[1]
-        grade = content.cssselect('b')[0].text_content()
-        auctionItem.grade = _stringToGrade(grade)
-
-        content = content.text_content()
+        content = self.html.cssselect('#lot_information .main p')[1].text_content()
+        parts = []
+        index = content.find("Редкость")
+        if index > 0:
+            parts.append(content[:index])
+            content = content[index:]
         index = content.find("Особенности")
         if index > 0:
-            auctionItem.info = '\n'.join([content[:index], content[index:], self.url])
-        else:
-            auctionItem.info = '\n'.join([content, self.url])
+            parts.append(content[:index])
+            content = content[index:]
+        parts.append(content)
+        item['info'] = '\n'.join(parts)
 
-        content = self.html.cssselect('p#lot_state.lot_info_box')[0].cssselect('#rate_count')[0].text_content()
-        if int(content) < 2:
-            QMessageBox.information(self.parent(), self.tr("Parse auction lot"),
-                                self.tr("Only 1 bid"),
-                                QMessageBox.Ok)
+#        content = self.html.cssselect('p#lot_state.lot_info_box')[0].cssselect('#rate_count')[0].text_content()
+#        if int(content) < 2:
+#            print("Only 1 bid")
 
-        content = self.html.cssselect('p#lot_state.lot_info_box')[0].cssselect('#price')[0].text_content()
-        auctionItem.price = stringToMoney(content)
+        bidders = {}
+        for tr in self.html.cssselect('#rates')[0].cssselect('tr.tableHostPrice'):
+            bidder = tr.cssselect('td')[0].text_content()
+            bidders[bidder] = None
+        item['bidders'] = len(bidders.keys())
 
-        price = float(auctionItem.price)
-        auctionItem.totalPayPrice = str(price + price * 10 / 100)
-
-        price = float(auctionItem.price)
-        auctionItem.totalSalePrice = str(price - price * 15 / 100)
-
-        auctionItem.images = []
+        images = []
         for tag in self.html.cssselect('div#lot_information')[0].cssselect('a'):
             href = tag.attrib['href']
             href = urllib.parse.urljoin(self.url, href)
-            auctionItem.images.append(href)
+            images.append(href)
+        item['images'] = images
 
-        return auctionItem
+        return item
+
+    def totalSalePrice(self, price):
+        commission = price * 15 / 100
+
+        totalPrice = price - commission
+        if totalPrice < 0:
+            totalPrice = 0
+
+        return str(totalPrice)
+
+    def totalPayPrice(self, price):
+        return str(price + price * 10 / 100)
 
 
 class WolmarParser(_AuctionParser):

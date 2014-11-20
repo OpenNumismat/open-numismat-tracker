@@ -20,7 +20,7 @@ from OpenNumismat import version
 from OpenNumismat.Tools import Gui
 from OpenNumismat.ImportDialog import ImportDialog
 
-from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser
+from OpenNumismat.Auctions.AuctionParser import AuctionSpbParser, ConrosParser
 
 
 class MainWindow(QMainWindow):
@@ -482,48 +482,52 @@ class MainWindow(QMainWindow):
     def importEvent(self):
         from PyQt5 import QtSql
         from OpenNumismat.Collection.Collection import Photo
-        
+
         model = self.collection.model()
         dialog = ImportDialog(model, self)
         res = dialog.exec_()
         if res == QDialog.Accepted:
-            parser = AuctionSpbParser()
+            if dialog.params['auction'] == 'АукционЪ.СПб':
+                parser = AuctionSpbParser()
+            elif dialog.params['auction'] == 'Конрос':
+                parser = ConrosParser()
+
             if dialog.params['category'] == 0:
                 categories = range(len(parser.categories()))
             else:
-                categories = [dialog.params['category']-1, ]
+                categories = [dialog.params['category'] - 1, ]
 
-            for auctNo in range(dialog.params['from_num'], dialog.params['till_num']+1):
+            for auctNo in range(dialog.params['from_num'], dialog.params['till_num'] + 1):
                 for category in categories:
                     url = parser.getPageUrl(auctNo, category, 0)
                     items = parser.parsePage(url)
                     if not items:
                         continue
-    
+
                     item1 = parser.parse(items[0]['url'])
-    
+
                     query = QtSql.QSqlQuery(self.collection.db)
                     query.prepare("INSERT INTO auctions (number, date, site, place, category)" \
                                   " VALUES (?, ?, ?, ?, ?)")
                     query.addBindValue(auctNo)
                     query.addBindValue(item1['date'])
                     query.addBindValue('Аукцион')
-                    query.addBindValue('АукционЪ.СПб')
+                    query.addBindValue(dialog.params['auction'])
                     query.addBindValue(parser.category(category))
-    
+
                     query.exec_()
-    
+
                     auct_id = query.lastInsertId()
-    
+
                     for page in parser.pages(auctNo, category):
                         url = parser.getPageUrl(auctNo, category, page)
                         items = parser.parsePage(url)
                         if not items:
                             break
-    
+
                         for item in items:
                             item1 = parser.parse(item['url'])
-    
+
                             record_item = {
                                     'title': item1['title'],
                                     'denomination': item['denomination'],
@@ -540,12 +544,16 @@ class MainWindow(QMainWindow):
                                     'url': item['url'],
                                     'bids': item['bids'],
                                     'bidders': item1['bidders'],
+                                    'info': item1['info'],
                                     'date': item1['date'],
-                                    'lotnum': item1['lotnum'],
                                     'auctionnum': auctNo,
                                     'site': 'Аукцион',
-                                    'place': 'АукционЪ.СПб',
+                                    'place': dialog.params['auction'],
                             }
+                            if 'lotnum' in item:
+                                record_item['lotnum'] = item['lotnum']
+                            else:
+                                record_item['lotnum'] = item1['lotnum']
                             if 'country' in item1:
                                 record_item['country'] = item1['country']
                             imageFields = ['photo1', 'photo2', 'photo3', 'photo4']
@@ -558,11 +566,14 @@ class MainWindow(QMainWindow):
                                         for _ in range(3):
                                             if photo.uploadImage():
                                                 break
-    
+
                                     photo.changed = True
                                     record_item[imageFields[i]] = photo
-    
+
                             record = model.record()
                             for field, value in record_item.items():
                                 record.setValue(field, value)
                             model.appendRecordQuiet(record)
+
+        self.collection.open(self.collection.getFileName())
+        self.setCollection(self.collection)
