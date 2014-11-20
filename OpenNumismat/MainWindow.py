@@ -547,9 +547,11 @@ class MainWindow(QMainWindow):
                                     'info': item1['info'],
                                     'date': item1['date'],
                                     'auctionnum': auctNo,
-                                    'site': 'Аукцион',
+                                    'site': item['site'],
                                     'place': dialog.params['auction'],
                             }
+                            if 'auctionnum' in item:
+                                record_item['auctionnum'] = item['auctionnum']
                             if 'lotnum' in item:
                                 record_item['lotnum'] = item['lotnum']
                             else:

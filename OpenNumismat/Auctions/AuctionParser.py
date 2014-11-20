@@ -176,7 +176,7 @@ class AuctionSpbParser(_AuctionParser):
                 totalPayPrice = self.totalPayPrice(price)
                 totalSalePrice = self.totalSalePrice(price)
                 items.append({
-                        'lotnum': lotnum,
+                        'lotnum': lotnum, 'site': 'Аукцион',
                         'url': url, 'denomination': denomination, 'year': year,
                         'mintmark': mintmark, 'material': material,
                         'grade': grade, 'buyer': buyer, 'bids': bids,
@@ -304,14 +304,25 @@ class ConrosParser(_AuctionParser):
     def getPageUrl(self, auctNo, category, page):
         self.page_category = category
 
-        url = "http://auction.conros.ru/clAuct/%d/%d/%d/0/asc/" % (auctNo - 227, category + 1, page)
+        url = "http://auction.conros.ru/clAuct/%d/%d/%d/0/asc/" % (auctNo, category + 1, page)
         return url
 
     def _parsePage(self):
         items = []
         hostname = 'http://' + urllib.parse.urlparse(self.url).hostname
-        table = self.html.cssselect('table.productListing')[0]
 
+        item = self.html.cssselect('td#center')[0]
+        item = item.cssselect('table table')[2]
+        item = item.cssselect('td.smallText')[1]
+        content = item.cssselect('strong')[0].text_content()
+        if content.find("Аукцион №") >= 0:
+            site = 'Аукцион'
+        else:
+            site = 'Очный'
+
+        auctionnum = content[content.find("№") + 1:]
+
+        table = self.html.cssselect('table.productListing')[0]
         for tr in table.cssselect('tr.productListing-data'):
             tds = tr.cssselect('td')
             if len(tds) >= 9:
@@ -328,7 +339,7 @@ class ConrosParser(_AuctionParser):
                 totalPayPrice = self.totalPayPrice(price)
                 totalSalePrice = self.totalSalePrice(price)
                 items.append({
-                        'lotnum': lotnum,
+                        'lotnum': lotnum, 'site': site, 'auctionnum': auctionnum,
                         'url': url, 'denomination': denomination, 'year': year,
                         'mintmark': mintmark, 'material': material,
                         'grade': grade, 'buyer': buyer, 'bids': bids,
