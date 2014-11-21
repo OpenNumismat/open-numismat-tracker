@@ -313,7 +313,10 @@ class ConrosParser(_AuctionParser):
 
         item = self.html.cssselect('td#center')[0]
         item = item.cssselect('table table')[2]
-        item = item.cssselect('td.smallText')[1]
+        item = item.cssselect('td.smallText')
+        if len(item) < 2:
+            return []
+        item = item[1]
         content = item.cssselect('strong')[0].text_content()
         if content.find("Аукцион №") >= 0:
             site = 'Аукцион'
