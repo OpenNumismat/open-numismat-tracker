@@ -73,17 +73,19 @@ class _AuctionParser(QtCore.QObject):
     def readHtmlPage(self, url, encoding='utf-8'):
         # TODO: Remove debug output
         print(url)
-        try:
-            data = urllib.request.urlopen(url).read()
+        for _ in range(3):
+            try:
+                data = urllib.request.urlopen(url).read()
 
-            self.doc = data.decode(encoding, 'ignore')
-            self.html = lxml.html.fromstring(self.doc)
-            self.url = url
-        except (ValueError, urllib.error.URLError):
-            print("Error while reading page %s" % url)
-            return False
+                self.doc = data.decode(encoding, 'ignore')
+                self.html = lxml.html.fromstring(self.doc)
+                self.url = url
 
-        return True
+                return True
+            except (ValueError, urllib.error.URLError):
+                print("Error while reading page %s" % url)
+
+        return False
 
     def _encoding(self):
         return 'utf-8'
