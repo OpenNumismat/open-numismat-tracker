@@ -597,6 +597,8 @@ class ListView(QTableView):
                         textRecordData.append('')
                     pickleRecordData.append(value.file)
                     pickleRecordData.append(value.url)
+                    pickleRecordData.append(self.model().workingDir)
+                    pickleRecordData.append(self.model().collectionName)
                 else:
                     textRecordData.append(textToClipboard(str(value)))
                     pickleRecordData.append(value)
@@ -623,7 +625,7 @@ class ListView(QTableView):
                 if not photo.isNull():
                     photo.changed = True
                 photo.file = None
-                
+
             self.model().appendRecord(record)
 
         return dialog.clickedButton
@@ -651,12 +653,17 @@ class ListView(QTableView):
                     else:
                         if i in [33, 34, 35, 36]:
                             photo = Photo(None, self.model())
-                            photo.file = recordData[i+(i-33)]
+                            photo.workingDir = recordData[i + (i - 33) * 3 + 2]
+                            photo.collectionName = recordData[i + (i - 33) * 3 + 3]
+                            photo.file = recordData[i + (i - 33) * 3]
                             photo.image.load(photo.fileName())
-                            photo.url = recordData[i+(i-33)+1]
+                            photo.url = recordData[i + (i - 33) * 3 + 1]
+                            photo.workingDir = self.model().workingDir
+                            photo.collectionName = self.model().collectionName
+                            photo.save()
                             record.setValue(i, photo)
                         elif i in [37, 38]:
-                            record.setValue(i, recordData[i+4])
+                            record.setValue(i, recordData[i + 12])
                         else:
                             record.setValue(i, recordData[i])
 
@@ -667,7 +674,7 @@ class ListView(QTableView):
                         if not photo.isNull():
                             photo.changed = True
                         photo.file = None
-                        
+
                     self.model().appendRecord(record)
                 else:
                     btn = self.__insertCoin(record, len(pickleData) - progress)
