@@ -633,41 +633,49 @@ class ListView(QTableView):
     def _paste(self):
         clipboard = QApplication.clipboard()
         mime = clipboard.mimeData()
-        progressDlg = None
 
         if mime.hasFormat(ListView.MimeType):
             # Load data stored by application
             pickleData = pickle.loads(mime.data(ListView.MimeType))
-            for progress, recordData in enumerate(pickleData):
-                if progressDlg:
+
+            result = QMessageBox.information(self, self.tr("Add"),
+                    self.tr("Are you sure to add a %n coin(s)?", '',
+                                                                 len(pickleData)),
+                    QMessageBox.Yes | QMessageBox.Cancel,
+                    QMessageBox.Cancel)
+            if result == QMessageBox.Yes:
+                progressDlg = Gui.ProgressDialog(
+                            self.tr("Inserting records"),
+                            self.tr("Cancel"), len(pickleData), self)
+
+                for progress, recordData in enumerate(pickleData):
                     progressDlg.setValue(progress)
                     if progressDlg.wasCanceled():
                         break
 
-                record = self.model().record()
-                for i in range(self.model().columnCount()):
-                    if isinstance(recordData[i], bytes):
-                        # Note: Qt::QVariant convert Python bytes type to
-                        # str type
-                        record.setValue(i, QtCore.QByteArray(recordData[i]))
-                    else:
-                        if i in [33, 34, 35, 36]:
-                            photo = Photo(None, self.model())
-                            photo.workingDir = recordData[i + (i - 33) * 3 + 2]
-                            photo.collectionName = recordData[i + (i - 33) * 3 + 3]
-                            photo.file = recordData[i + (i - 33) * 3]
-                            photo.image.load(photo.fileName())
-                            photo.url = recordData[i + (i - 33) * 3 + 1]
-                            photo.workingDir = self.model().workingDir
-                            photo.collectionName = self.model().collectionName
-                            photo.save()
-                            record.setValue(i, photo)
-                        elif i in [37, 38]:
-                            record.setValue(i, recordData[i + 12])
+                    record = self.model().record()
+                    for i in range(self.model().columnCount()):
+                        if isinstance(recordData[i], bytes):
+                            # Note: Qt::QVariant convert Python bytes type to
+                            # str type
+                            record.setValue(i, QtCore.QByteArray(recordData[i]))
                         else:
-                            record.setValue(i, recordData[i])
+                            if i in [33, 34, 35, 36]:
+                                photo = Photo(None, self.model())
+                                photo.workingDir = recordData[i + (i - 33) * 3 + 2]
+                                photo.collectionName = recordData[i + (i - 33) * 3 + 3]
+                                photo.file = recordData[i + (i - 33) * 3]
+                                photo.image.load(photo.fileName())
+                                photo.url = recordData[i + (i - 33) * 3 + 1]
+                                photo.workingDir = self.model().workingDir
+                                photo.collectionName = self.model().collectionName
+                                photo.save()
+                                record.setValue(i, photo)
+                            elif i in [37, 38]:
+                                record.setValue(i, recordData[i + 12])
+                            else:
+                                record.setValue(i, recordData[i])
 
-                if progressDlg:
                     for i in range(4):
                         field = "photo%d" % (i + 1)
                         photo = record.value(field)
@@ -675,51 +683,8 @@ class ListView(QTableView):
                             photo.changed = True
                         photo.file = None
 
-                    self.model().appendRecord(record)
-                else:
-                    btn = self.__insertCoin(record, len(pickleData) - progress)
-                    if btn == QDialogButtonBox.Abort:
-                        break
-                    if btn == QDialogButtonBox.SaveAll:
-                        progressDlg = Gui.ProgressDialog(
-                                    self.tr("Inserting records"),
-                                    self.tr("Cancel"), len(pickleData), self)
+                    self.model().appendRecordQuiet(record)
 
-            if progressDlg:
-                progressDlg.reset()
-
-        elif mime.hasText():
-            # Load data stored by another application (Excel)
-            # TODO: Process fields with \n and \t
-            # http://docs.python.org/3.2/library/csv.html#csv.excel_tab
-            textData = clipboard.text().split('\n')
-            for progress, recordData in enumerate(textData):
-                if progressDlg:
-                    progressDlg.setValue(progress)
-                    if progressDlg.wasCanceled():
-                        break
-
-                data = recordData.split('\t')
-                # Skip very short (must contain ID and NAME) and too large data
-                if len(data) < 2 or len(data) > self.model().columnCount():
-                    return
-
-                record = self.model().record()
-                for i in range(len(data)):
-                    record.setValue(i, clipboardToText(data[i]))
-
-                if progressDlg:
-                    self.model().appendRecord(record)
-                else:
-                    btn = self.__insertCoin(record, len(textData) - progress)
-                    if btn == QDialogButtonBox.Abort:
-                        break
-                    if btn == QDialogButtonBox.SaveAll:
-                        progressDlg = Gui.ProgressDialog(
-                                    self.tr("Inserting records"),
-                                    self.tr("Cancel"), len(pickleData), self)
-
-            if progressDlg:
                 progressDlg.reset()
 
     def _delete(self, indexes=None):
