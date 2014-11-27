@@ -5,8 +5,9 @@ import shutil
 import sys
 import traceback
 
-from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import QCoreApplication, QTranslator, QUrl, PYQT_VERSION_STR
 from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtGui import QDesktopServices
 
 import OpenNumismat
 from OpenNumismat.Settings import Settings
@@ -24,8 +25,8 @@ def main():
 
     app = QApplication(sys.argv)
 
-    QtCore.QCoreApplication.setOrganizationName(version.Company)
-    QtCore.QCoreApplication.setApplicationName(version.AppName)
+    QCoreApplication.setOrganizationName(version.Company)
+    QCoreApplication.setApplicationName(version.AppName)
 
     settings = Settings()
     if settings['error']:
@@ -63,11 +64,11 @@ def main():
 
     lang = settings['locale']
 
-    translator = QtCore.QTranslator()
+    translator = QTranslator()
     translator.load('lang_' + lang, OpenNumismat.PRJ_PATH)
     app.installTranslator(translator)
 
-    translatorQt = QtCore.QTranslator()
+    translatorQt = QTranslator()
     translatorQt.load('qtbase_' + lang, OpenNumismat.PRJ_PATH)
     app.installTranslator(translatorQt)
 
@@ -105,15 +106,15 @@ def exceptHook(type_, value, tback):
                                                    platform.architecture()[0],
                                                    platform.version()))
         errorMessage.append("Python: %s" % platform.python_version())
-        errorMessage.append("Qt: %s" % QtCore.PYQT_VERSION_STR)
+        errorMessage.append("Qt: %s" % PYQT_VERSION_STR)
         errorMessage.append('')
         errorMessage.append(stack)
 
-        url = QtCore.QUrl(version.Web + 'issues/entry')
+        url = QUrl(version.Web + 'issues/entry')
         url.setQueryItems([('summary', subject),
                            ('comment', '\n'.join(errorMessage))])
 
-        executor = QtGui.QDesktopServices()
+        executor = QDesktopServices()
         executor.openUrl(url)
 
     # Call the default handler

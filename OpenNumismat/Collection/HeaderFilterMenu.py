@@ -1,10 +1,10 @@
-from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtSql import QSqlQuery
 from PyQt5.QtWidgets import *
 
 from OpenNumismat.Collection.CollectionFields import FieldTypes as Type
 from OpenNumismat.Tools.Gui import createIcon
+from OpenNumismat.Settings import Settings
 
 
 class FilterMenuButton(QPushButton):
@@ -22,6 +22,7 @@ class FilterMenuButton(QPushButton):
         self.fieldid = columnParam.fieldid
         self.filters = listParam.filters
         self.listParam = listParam
+        self.settings = Settings()
 
         menu = QMenu()
 
@@ -64,7 +65,7 @@ class FilterMenuButton(QPushButton):
             filtersSql = self.filtersToSql(filters.values())
             sql = "SELECT count(*) FROM coins WHERE " + filtersSql
             if filtersSql:
-                sql = sql + ' AND '
+                sql += ' AND '
 
             # Get blank row count
             query = QSqlQuery(sql + blanksFilter, self.db)
@@ -98,6 +99,8 @@ class FilterMenuButton(QPushButton):
             if filtersSql:
                 filtersSql = 'WHERE ' + filtersSql
             sql = "SELECT DISTINCT %s FROM coins %s" % (self.columnName, filtersSql)
+            if self.settings['sort_filter']:
+                sql += " ORDER BY %s ASC" % self.columnName
             query = QSqlQuery(sql, self.db)
 
             while query.next():
@@ -137,6 +140,10 @@ class FilterMenuButton(QPushButton):
 
         self.listWidget.itemChanged.connect(self.itemChanged)
 
+        self.searchBox = QLineEdit(self)
+        self.searchBox.setPlaceholderText(self.tr("Filter"))
+        self.searchBox.textChanged.connect(self.applySearch)
+
         self.buttonBox = QDialogButtonBox(Qt.Horizontal)
         self.buttonBox.addButton(QDialogButtonBox.Ok)
         self.buttonBox.addButton(QDialogButtonBox.Cancel)
@@ -144,6 +151,7 @@ class FilterMenuButton(QPushButton):
         self.buttonBox.rejected.connect(self.menu().hide)
 
         layout = QVBoxLayout(self)
+        layout.addWidget(self.searchBox)
         layout.addWidget(self.listWidget)
         layout.addWidget(self.buttonBox)
 
@@ -243,6 +251,14 @@ class FilterMenuButton(QPushButton):
 
     def clear(self):
         self.setIcon(createIcon())
+
+    def applySearch(self, text):
+        for i in range(self.listWidget.count()):
+            item = self.listWidget.item(i)
+            if item.text().find(text) >= 0:
+                item.setHidden(False)
+            else:
+                item.setHidden(True)
 
     @staticmethod
     def filtersToSql(filters):

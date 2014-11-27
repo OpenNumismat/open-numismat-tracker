@@ -1,6 +1,7 @@
-from PyQt5 import QtGui, QtCore, QtSql
+from PyQt5 import QtCore, QtSql
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
 
 from OpenNumismat.Reference.ReferenceDialog import ReferenceDialog, CrossReferenceDialog
@@ -8,7 +9,7 @@ from OpenNumismat.Reference.ReferenceDialog import ReferenceDialog, CrossReferen
 
 class SqlTableModel(QtSql.QSqlTableModel):
     def __init__(self, parent, db):
-        super(SqlTableModel, self).__init__(parent, db)
+        super().__init__(parent, db)
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DecorationRole:
@@ -17,16 +18,16 @@ class SqlTableModel(QtSql.QSqlTableModel):
             iconIndex = self.index(index.row(), self.fieldIndex('icon'))
             if not self.data(iconIndex) or self.data(iconIndex).isNull():
                 return None
-            icon = QtGui.QPixmap()
+            icon = QPixmap()
             icon.loadFromData(self.data(iconIndex))
             return icon
 
-        return super(SqlTableModel, self).data(index, role)
+        return super().data(index, role)
 
 
 class SqlRelationalTableModel(QtSql.QSqlRelationalTableModel):
     def __init__(self, model, parent, db):
-        super(SqlRelationalTableModel, self).__init__(parent, db)
+        super().__init__(parent, db)
 
         self.model = model
 

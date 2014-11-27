@@ -1,21 +1,21 @@
 import locale
 
-from PyQt5 import QtGui
 from PyQt5.QtCore import QMargins, QUrl, QDate, Qt
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from OpenNumismat.Tools.Gui import createIcon
 
 
 # Reimplementing QDoubleValidator for replace comma with dot
-class DoubleValidator(QtGui.QDoubleValidator):
+class DoubleValidator(QDoubleValidator):
     def __init__(self, bottom, top, decimals, parent=None):
         super(DoubleValidator, self).__init__(bottom, top, decimals, parent)
 
     def validate(self, input_, pos):
         input_ = input_.lstrip()
         if len(input_) == 0:
-            return QtGui.QValidator.Intermediate, input_, pos
+            return QValidator.Intermediate, input_, pos
 
         lastWasDigit = False
         decPointFound = False
@@ -28,56 +28,56 @@ class DoubleValidator(QtGui.QDoubleValidator):
             if c.isdigit():
                 if decPointFound and self.decimals() > 0:
                     if decDigitCnt < self.decimals():
-                        decDigitCnt = decDigitCnt + 1
+                        decDigitCnt += 1
                     else:
-                        return QtGui.QValidator.Invalid, input_, pos
+                        return QValidator.Invalid, input_, pos
 
                 value = value + c
                 lastWasDigit = True
             else:
                 if (c == dp or c == '.') and self.decimals() != 0:
                     if decPointFound:
-                        return QtGui.QValidator.Invalid, input_, pos
+                        return QValidator.Invalid, input_, pos
                     else:
-                        value = value + '.'
+                        value += '.'
                         decPointFound = True
                 elif c == ts or (ts == chr(0xA0) and c == ' '):
                     if not lastWasDigit or decPointFound:
-                        return QtGui.QValidator.Invalid, input_, pos
+                        return QValidator.Invalid, input_, pos
                 else:
-                    return QtGui.QValidator.Invalid, input_, pos
+                    return QValidator.Invalid, input_, pos
 
                 lastWasDigit = False
 
         try:
             val = float(value)
         except ValueError:
-            return QtGui.QValidator.Invalid, input_, pos
+            return QValidator.Invalid, input_, pos
 
         if self.bottom() > val or val > self.top():
-            return QtGui.QValidator.Invalid, input_, pos
+            return QValidator.Invalid, input_, pos
 
-        return QtGui.QValidator.Acceptable, input_, pos
+        return QValidator.Acceptable, input_, pos
 
 
-class NumberValidator(QtGui.QIntValidator):
+class NumberValidator(QIntValidator):
     def __init__(self, minimum, maximum, parent=None):
         super(NumberValidator, self).__init__(minimum, maximum, parent)
 
     def validate(self, input_, pos):
         input_ = input_.strip()
         if len(input_) == 0:
-            return QtGui.QValidator.Intermediate, input_, pos
+            return QValidator.Intermediate, input_, pos
 
         try:
             val = int(input_)
         except ValueError:
-            return QtGui.QValidator.Invalid, input_, pos
+            return QValidator.Invalid, input_, pos
 
         if self.bottom() > val or val > self.top():
-            return QtGui.QValidator.Invalid, input_, pos
+            return QValidator.Invalid, input_, pos
 
-        return QtGui.QValidator.Acceptable, input_, pos
+        return QValidator.Acceptable, input_, pos
 
 
 class LineEdit(QLineEdit):
@@ -125,7 +125,7 @@ class UrlLineEdit(QWidget):
     def clickedButtonLoad(self):
         url = QUrl(self.text())
 
-        executor = QtGui.QDesktopServices()
+        executor = QDesktopServices()
         executor.openUrl(url)
 
     def clear(self):
@@ -153,9 +153,6 @@ class LineEditRef(QWidget):
     def __init__(self, reference, parent=None):
         super(LineEditRef, self).__init__(parent)
 
-        self.reference = reference
-        self.reference.changed.connect(self.setText)
-
         self.comboBox = QComboBox(self)
         self.comboBox.setEditable(True)
         self.comboBox.lineEdit().setMaxLength(1024)
@@ -166,6 +163,9 @@ class LineEditRef(QWidget):
         self.comboBox.setModelColumn(reference.model.fieldIndex('value'))
 
         self.comboBox.setCurrentIndex(-1)
+
+        self.reference = reference
+        self.reference.changed.connect(self.setText)
 
         layout = QHBoxLayout()
         layout.addWidget(self.comboBox)
@@ -269,7 +269,7 @@ class _DoubleEdit(QLineEdit):
         self._decimals = decimals
 
         validator = DoubleValidator(bottom, top, decimals, parent)
-        validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        validator.setNotation(QDoubleValidator.StandardNotation)
         self.setValidator(validator)
 
     def focusInEvent(self, event):

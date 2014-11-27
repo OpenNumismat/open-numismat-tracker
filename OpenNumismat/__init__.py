@@ -23,7 +23,6 @@ if __imgDirs:
 else:
     IMAGE_PATH = HOME_PATH
 
-
 # Getting path where stored application data (icons, templates, etc)
 PRJ_PATH = os.path.abspath(os.path.dirname(__file__))
 # sys.frozen is True when running from cx_Freeze executable

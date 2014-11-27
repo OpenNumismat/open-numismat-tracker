@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QLocale, QSettings, QMargins
 from PyQt5.QtWidgets import *
 
 import OpenNumismat
@@ -69,7 +68,7 @@ class BaseSettings(dict):
 
 
 def _getLocale():
-    locale = QtCore.QLocale.system().name()
+    locale = QLocale.system().name()
     if '_' in locale:
         return locale.split('_')[0]
     else:
@@ -83,14 +82,16 @@ class Settings(BaseSettings):
                'error': False, 'updates': False,
                'free_numeric': False,
                'store_sorting': False,
-               'download_images': True,
+               'sort_filter': True,
+               'sort_tree': True,
                'template': 'FCoins',
+               'download_images': True,
                'ImageSideLen': 1024}
 
     def __init__(self, autoSave=False):
         super(Settings, self).__init__(autoSave)
 
-        self.settings = QtCore.QSettings()
+        self.settings = QSettings()
 
     def keys(self):
         return self.Default.keys()
@@ -98,9 +99,9 @@ class Settings(BaseSettings):
     def _getValue(self, key):
         value = self.settings.value('mainwindow/' + key)
         if value:
-            if key in ('error', 'updates', 'free_numeric', 'store_sorting', 'download_images'):
+            if key in ('error', 'updates', 'free_numeric', 'store_sorting', 'download_images',
+                       'sort_filter', 'sort_tree'):
                 # Convert boolean value
-                # TODO: From Qt 5.1 SQLite boolean type work correct
                 value = (value == 'true')
         else:
             value = self.Default[key]
@@ -145,7 +146,7 @@ class MainSettingsPage(QWidget):
         hLayout = QHBoxLayout()
         hLayout.addWidget(self.backupFolder)
         hLayout.addWidget(self.backupFolderButton)
-        hLayout.setContentsMargins(QtCore.QMargins())
+        hLayout.setContentsMargins(QMargins())
 
         layout.addRow(self.tr("Backup folder"), hLayout)
 
@@ -159,7 +160,7 @@ class MainSettingsPage(QWidget):
         hLayout = QHBoxLayout()
         hLayout.addWidget(self.reference)
         hLayout.addWidget(self.referenceButton)
-        hLayout.setContentsMargins(QtCore.QMargins())
+        hLayout.setContentsMargins(QMargins())
 
         layout.addRow(self.tr("Reference"), hLayout)
 
@@ -193,6 +194,16 @@ class MainSettingsPage(QWidget):
         self.storeSorting.setChecked(settings['store_sorting'])
         layout.addRow(self.storeSorting)
 
+        self.sortFilter = QCheckBox(
+                            self.tr("Sort items in filters (slow)"), self)
+        self.sortFilter.setChecked(settings['sort_filter'])
+        layout.addRow(self.sortFilter)
+
+        self.sortTree = QCheckBox(
+                            self.tr("Sort items in tree (slow)"), self)
+        self.sortTree.setChecked(settings['sort_tree'])
+        layout.addRow(self.sortTree)
+
         current = 0
         self.templateSelector = QComboBox(self)
         for i, template in enumerate(Report.scanTemplates()):
@@ -208,7 +219,7 @@ class MainSettingsPage(QWidget):
         self.setLayout(layout)
 
     def backupButtonClicked(self):
-        folder, _selectedFilter = QFileDialog.getExistingDirectory(self,
+        folder = QFileDialog.getExistingDirectory(self,
                                                 self.tr("Backup folder"),
                                                 self.backupFolder.text())
         if folder:
@@ -234,6 +245,8 @@ class MainSettingsPage(QWidget):
         settings['download_images'] = self.downloadImages.isChecked()
         settings['free_numeric'] = self.freeNumeric.isChecked()
         settings['store_sorting'] = self.storeSorting.isChecked()
+        settings['sort_filter'] = self.sortFilter.isChecked()
+        settings['sort_tree'] = self.sortTree.isChecked()
         settings['template'] = self.templateSelector.currentText()
         settings['ImageSideLen'] = int(self.imageSideLen.text())
 

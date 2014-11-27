@@ -2,9 +2,10 @@ import operator
 import pickle
 import os.path
 
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, pyqtSignal, QSortFilterProxyModel
 from PyQt5.QtSql import QSqlQuery
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from OpenNumismat.EditCoinDialog.EditCoinDialog import EditCoinDialog
@@ -42,12 +43,12 @@ class ImageDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
         data = index.data()
         if data and not data.isNull():
-            image = QtGui.QImage()
+            image = QImage()
             image.loadFromData(data)
             rect = option.rect
             scaledImage = image.scaled(rect.width(), rect.height(),
                                 Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            pixmap = QtGui.QPixmap.fromImage(scaledImage)
+            pixmap = QPixmap.fromImage(scaledImage)
             # Set rect at center of item
             rect.translate((rect.width() - pixmap.width()) / 2,
                            (rect.height() - pixmap.height()) / 2)
@@ -69,16 +70,16 @@ class SortFilterProxyModel(QSortFilterProxyModel):
         leftData = self.model.dataDisplayRole(left)
         rightData = self.model.dataDisplayRole(right)
 
-# TODO: Check after porting to PyQt5
+# TODO: Check this after porting to PyQt5
 #         if self.order == Qt.AscendingOrder:
-#             if leftData == '' or isinstance(leftData, QtCore.QPyNullVariant):
+#             if leftData == '' or leftData.isNull():
 #                 return False
-#             elif rightData == '' or isinstance(rightData, QtCore.QPyNullVariant):
+#             elif rightData == '' or rightData.isNull():
 #                 return True
 #         else:
-#             if rightData == '' or isinstance(rightData, QtCore.QPyNullVariant):
+#             if rightData == '' or rightData.isNull():
 #                 return False
-#             elif leftData == '' or isinstance(leftData, QtCore.QPyNullVariant):
+#             elif leftData == '' or leftData.isNull():
 #                 return True
 
         if isinstance(leftData, str):
@@ -344,11 +345,11 @@ class ListView(QTableView):
         key = event.key()
         if (key == Qt.Key_Return) or (key == Qt.Key_Enter):
             self._edit(self.currentIndex())
-        elif event.matches(QtGui.QKeySequence.Copy):
+        elif event.matches(QKeySequence.Copy):
             self._copy(self.selectedRows())
-        elif event.matches(QtGui.QKeySequence.Paste):
+        elif event.matches(QKeySequence.Paste):
             self._paste()
-        elif event.matches(QtGui.QKeySequence.Delete):
+        elif event.matches(QKeySequence.Delete):
             self._delete(self.selectedRows())
         else:
             return super(ListView, self).keyPressEvent(event)
@@ -363,9 +364,9 @@ class ListView(QTableView):
         menu.setDefaultAction(act)
 
         menu.addAction(createIcon('page_copy.png'),
-                       self.tr("Copy"), self._copy, QtGui.QKeySequence.Copy)
+                       self.tr("Copy"), self._copy, QKeySequence.Copy)
         menu.addAction(createIcon('page_paste.png'),
-                       self.tr("Paste"), self._paste, QtGui.QKeySequence.Paste)
+                       self.tr("Paste"), self._paste, QKeySequence.Paste)
         menu.addSeparator()
         act = menu.addAction(self.tr("Clone"), self._clone)
         # Disable Clone when more than one record selected
@@ -378,7 +379,7 @@ class ListView(QTableView):
         style = QApplication.style()
         icon = style.standardIcon(QStyle.SP_TrashIcon)
         menu.addAction(icon, self.tr("Delete"),
-                       self._delete, QtGui.QKeySequence.Delete)
+                       self._delete, QKeySequence.Delete)
         menu.exec_(self.mapToGlobal(pos))
 
     def currentChanged(self, current, previous):
@@ -432,7 +433,7 @@ class ListView(QTableView):
         fileName = report.generate(records)
 
         if fileName:
-            executor = QtGui.QDesktopServices()
+            executor = QDesktopServices()
             executor.openUrl(QtCore.QUrl.fromLocalFile(fileName))
 
     def saveTable(self):
@@ -447,7 +448,7 @@ class ListView(QTableView):
         if lastExportDir:
             defaultFileName = os.path.join(lastExportDir, defaultFileName)
 
-        fileName, filter_ = QFileDialog.getSaveFileNameAndFilter(self,
+        fileName, selectedFilter = QFileDialog.getSaveFileName(self,
                                     self.tr("Save as"),
                                     defaultFileName,
                                     filter=';;'.join(filters))
@@ -459,13 +460,13 @@ class ListView(QTableView):
             progressDlg = Gui.ProgressDialog(self.tr("Saving list"),
                                     self.tr("Cancel"), model.rowCount(), self)
 
-            if filters.index(filter_) == 0:  # Excel documents
+            if filters.index(selectedFilter) == 0:  # Excel documents
                 export = ExportToExcel(fileName, self.listParam.page.title)
-            elif filters.index(filter_) == 1:  # Excel documents
+            elif filters.index(selectedFilter) == 1:  # Excel documents
                 export = ExportToHtml(fileName, self.listParam.page.title)
-            elif filters.index(filter_) == 2:  # Excel documents
+            elif filters.index(selectedFilter) == 2:  # Excel documents
                 export = ExportToCsv(fileName, self.listParam.page.title)
-            elif filters.index(filter_) == 3:  # Excel documents
+            elif filters.index(selectedFilter) == 3:  # Excel documents
                 export = ExportToCsvUtf8(fileName, self.listParam.page.title)
             else:
                 raise

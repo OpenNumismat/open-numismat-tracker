@@ -8,7 +8,7 @@ except ImportError:
     print('win32com module missed. Exporting to Word not available')
     exportToWordAvailable = False
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -45,8 +45,8 @@ class ZoomFactorValidator(QDoubleValidator):
             input += '%'
         num_size = 4
         if state == QDoubleValidator.Intermediate:
-            i = input.indexOf(QtCore.QLocale.system().decimalPoint())
-            if (i == -1 and input.size() > num_size) \
+            i = input.find(QtCore.QLocale.system().decimalPoint())
+            if (i == -1 and len(input) > num_size) \
                     or (i != -1 and i > num_size):
                 return QDoubleValidator.Invalid, input, pos
 
@@ -289,7 +289,7 @@ class PreviewDialog(QDialog):
 
     def qt_setupActionIcon(self, action, name):
         imagePrefix = ":/qt-project.org/dialogs/qprintpreviewdialog/images/"
-        icon = QtGui.QIcon()
+        icon = QIcon()
         icon.addFile(imagePrefix + name + "-24.png", QtCore.QSize(24, 24))
         icon.addFile(imagePrefix + name + "-32.png", QtCore.QSize(32, 32))
         action.setIcon(icon)
