@@ -148,12 +148,10 @@ class TreeView(QTreeWidget):
         self.addTopLevelItem(rootItem)
 
     def expandedEvent(self, item):
-        for i in range(item.childCount()):
-            child = item.child(i)
-            if child.childCount() == 0:
-                paramIndex = child.data(0, self.ParamRole) + 1
-                filters = child.data(0, self.FiltersRole)
-                self.__updateChilds(child, paramIndex, filters)
+        paramIndex = item.data(0, self.ParamRole)
+        filters = item.data(0, self.FiltersRole)
+        if item.childCount() == 0:
+            self.__updateChilds(item, paramIndex, filters)
 
         self.resizeColumnToContents(0)
 
@@ -192,9 +190,13 @@ class TreeView(QTreeWidget):
                     newFilters = filters + ' AND ' + newFilters
 
                 child = QTreeWidgetItem([text, ])
-                child.setData(0, self.ParamRole, paramIndex)
+                child.setData(0, self.ParamRole, paramIndex + 1)
                 child.setData(0, self.FiltersRole, newFilters)
                 child.setData(0, self.FieldsRole, fields)
+
+                if not self.treeParam.isLast(paramIndex):
+                    child.setChildIndicatorPolicy(0)
+
                 item.addChild(child)
 
                 # Restore selection
@@ -205,14 +207,13 @@ class TreeView(QTreeWidget):
 
         # Recursion for next field if nothing selected
         if item.childCount() == 0:
-            self.__updateChilds(item, paramIndex + 1, filters)
+            self.__updateChilds(item, paramIndex + 2, filters)
 
     def modelChanged(self):
         if self.changingEnabled:
             self.collapseAll()
             rootItem = self.topLevelItem(0)
             rootItem.takeChildren()  # remove all children
-            self.__updateChilds(rootItem)
             self.expandItem(rootItem)
 
     def rowChangedEvent(self, current):
