@@ -209,6 +209,7 @@ class UpdaterTo2(_Updater):
             coin_query.addBindValue(record.value('updatedat'))
             if not coin_query.exec_():
                 print(coin_query.lastError().text())
+                print(coin_query.lastQuery())
 
         self.progressDlg.setLabelText(self.tr("Saving..."))
 

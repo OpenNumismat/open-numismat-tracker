@@ -46,6 +46,9 @@ class TreeParam(QtCore.QObject):
         names = [field.name for field in self._params[index]]
         return names
 
+    def isLast(self, index):
+        return index >= (len(self._params) - 1)
+
     def _load(self):
         self.clear()
         count = 0
